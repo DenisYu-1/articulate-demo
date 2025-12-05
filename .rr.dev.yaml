@@ -1,1 +1,16 @@
 version: '3'
+
+server:
+  command: "php worker.php"
+
+http:
+  address: 0.0.0.0:8080
+  env:
+    - XDEBUG_SESSION: 1
+  pool:
+    debug: true
+    num_workers: 1
+
+logs:
+  level: debug
+  mode: development
