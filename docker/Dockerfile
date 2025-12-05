@@ -22,12 +22,11 @@ COPY --from=builder /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 COPY composer.* ./
-COPY ./packages/* ./
+COPY . .
 
 RUN composer install
 
 EXPOSE 8080/tcp 9003
 
-COPY . .
 
 CMD rr serve -c .rr.dev.yaml

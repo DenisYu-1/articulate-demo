@@ -23,23 +23,23 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    Norm\Commands\InitCommand:
+    Articulate\Commands\InitCommand:
         tags: [ 'console.command' ]
 
-    Norm\Commands\DiffCommand:
+    Articulate\Commands\DiffCommand:
         tags: [ 'console.command' ]
 
-    Norm\Commands\MigrateCommand:
+    Articulate\Commands\MigrateCommand:
         tags: [ 'console.command' ]
 
-    Norm\Connection:
+    Articulate\Connection:
         arguments:
             $dsn: '%env(resolve:DATABASE_DSN)%'
             $user: '%env(resolve:DATABASE_USER)%'
             $password: '%env(resolve:DATABASE_PASSWORD)%'
 
-    Norm\Modules\DatabaseSchemaReader\DatabaseSchemaReader:
+    Articulate\Modules\DatabaseSchemaReader\DatabaseSchemaReader:
 
-    Norm\Modules\DatabaseSchemaComparator\DatabaseSchemaComparator:
+    Articulate\Modules\DatabaseSchemaComparator\DatabaseSchemaComparator:
         
-    Norm\Modules\MigrationsGenerator\MigrationsCommandGenerator:
+    Articulate\Modules\MigrationsGenerator\MigrationsCommandGenerator:

@@ -1,5 +1,5 @@
 {
-    "name": "denis/orm",
+    "name": "denis/articulate-demo",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -10,7 +10,7 @@
         "ext-iconv": "*",
         "ext-pdo": "*",
         "baldinof/roadrunner-bundle": "^3.1",
-        "denis/articulate": "dev-master",
+        "denis/articulate": "dev-main",
         "nyholm/psr7": "^1.8",
         "spiral/roadrunner-cli": "*",
         "spiral/roadrunner-http": "*",
@@ -64,7 +64,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../articulate"
+            "url": "./packages/articulate"
         }
     ],
     "conflict": {

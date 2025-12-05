@@ -26,7 +26,7 @@ services:
       - ${PWD}/docker/php.ini:/usr/local/etc/php/conf.d/xdebug.ini
     network_mode: service:ts-rr-test
 #    ports:
-#      - 8080:8080
+#      - 8084:8080
     environment:
       - PHP_IDE_CONFIG=serverName=orm
     depends_on:
@@ -51,7 +51,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - pgsql_data:/var/lib/postgresql/data
 
