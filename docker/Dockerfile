@@ -1,7 +1,5 @@
 FROM composer AS builder
-
-FROM ghcr.io/roadrunner-server/roadrunner:2024 AS roadrunner
-FROM php:8.3-cli
+FROM php:8.4-fpm
 
 # Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
@@ -17,7 +15,6 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 RUN docker-php-ext-install sockets
 
-COPY --from=roadrunner /usr/bin/rr /usr/local/bin/rr
 COPY --from=builder /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
@@ -26,7 +23,4 @@ COPY . .
 
 RUN composer install
 
-EXPOSE 8080/tcp 9003
-
-
-CMD rr serve -c .rr.dev.yaml
+EXPOSE 9000

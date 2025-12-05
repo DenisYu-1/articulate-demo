@@ -5,21 +5,17 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo": "*",
-        "baldinof/roadrunner-bundle": "^3.1",
         "denis/articulate": "dev-main",
-        "nyholm/psr7": "^1.8",
-        "spiral/roadrunner-cli": "*",
-        "spiral/roadrunner-http": "*",
-        "symfony/console": "7.1.*",
-        "symfony/dotenv": "7.1.*",
+        "symfony/console": "8.*",
+        "symfony/dotenv": "8.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "7.1.*",
-        "symfony/runtime": "7.1.*",
-        "symfony/yaml": "7.1.*"
+        "symfony/framework-bundle": "8.*",
+        "symfony/runtime": "8.*",
+        "symfony/yaml": "8.*"
     },
     "config": {
         "allow-plugins": {
@@ -63,8 +59,8 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "./packages/articulate"
+            "type": "vcs",
+            "url": "https://github.com/DenisYu-1/articulate.git"
         }
     ],
     "conflict": {
@@ -73,7 +69,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "7.1.*"
+            "require": "8.*"
         }
     },
     "require-dev": {
