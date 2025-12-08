@@ -19,8 +19,10 @@ COPY --from=builder /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 COPY composer.* ./
+RUN composer install --no-scripts
+
 COPY . .
 
-RUN composer install
-
 EXPOSE 9000
+
+CMD ["php-fpm"]
