@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    articulate_entities_path: 'src/Entity'
 
 services:
     # default configuration for services in *this* file
@@ -23,16 +24,16 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Temporarily disabled - Articulate commands need to be updated for Symfony 8 compatibility
-    # The getDefaultName() method was removed in Symfony 8
-    # Articulate\Commands\InitCommand:
-    #     tags: [ 'console.command' ]
+    Articulate\Commands\InitCommand:
+        tags: [ 'console.command' ]
 
-    # Articulate\Commands\DiffCommand:
-    #     tags: [ 'console.command' ]
+    Articulate\Commands\DiffCommand:
+        tags: [ 'console.command' ]
+        arguments:
+            $entitiesPath: '%articulate_entities_path%'
 
-    # Articulate\Commands\MigrateCommand:
-    #     tags: [ 'console.command' ]
+    Articulate\Commands\MigrateCommand:
+        tags: [ 'console.command' ]
 
     Articulate\Connection:
         arguments:
@@ -45,3 +46,5 @@ services:
     Articulate\Modules\DatabaseSchemaComparator\DatabaseSchemaComparator:
         
     Articulate\Modules\MigrationsGenerator\MigrationsCommandGenerator:
+
+    Articulate\Schema\SchemaNaming:
