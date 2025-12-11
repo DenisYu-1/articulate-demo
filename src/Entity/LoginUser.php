@@ -6,7 +6,7 @@ use Articulate\Attributes\Entity;
 use Articulate\Attributes\Indexes\PrimaryKey;
 use Articulate\Attributes\Property;
 
-#[Entity(tableName: 'users')]
+#[Entity(tableName: 'user')]
 class LoginUser
 {
     #[PrimaryKey]

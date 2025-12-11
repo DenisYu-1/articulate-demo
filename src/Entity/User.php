@@ -10,7 +10,7 @@ use Articulate\Attributes\Relations\ManyToMany;
 use Articulate\Attributes\Relations\OneToMany;
 use Articulate\Attributes\Relations\OneToOne;
 
-#[Entity(tableName: 'users')]
+#[Entity]
 class User
 {
     #[PrimaryKey]
