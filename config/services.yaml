@@ -5,6 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     articulate_entities_path: 'src/Entity'
+    articulate_migrations_path: 'migrations'
+    articulate_migrations_namespace: 'App\Migrations'
 
 services:
     # default configuration for services in *this* file
@@ -31,9 +33,13 @@ services:
         tags: [ 'console.command' ]
         arguments:
             $entitiesPath: '%articulate_entities_path%'
+            $migrationsPath: '%articulate_migrations_path%'
+            $migrationsNamespace: '%articulate_migrations_namespace%'
 
     Articulate\Commands\MigrateCommand:
         tags: [ 'console.command' ]
+        arguments:
+            $migrationsPath: '%articulate_migrations_path%'
 
     Articulate\Connection:
         arguments:
