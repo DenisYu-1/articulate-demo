@@ -59,8 +59,11 @@
     },
     "repositories": [
         {
-            "type": "vcs",
-            "url": "https://github.com/DenisYu-1/articulate.git"
+            "type": "path",
+            "url": "/articulate",
+            "options": {
+                "symlink": false
+            }
         }
     ],
     "conflict": {

@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/DenisYu-1/articulate.git",
-                "reference": "07cf05416acb94020dfcd190206934038184ef0d"
+                "reference": "6fda3bedb3b705dbac7196a01a23f8f7df07f689"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/07cf05416acb94020dfcd190206934038184ef0d",
-                "reference": "07cf05416acb94020dfcd190206934038184ef0d",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/6fda3bedb3b705dbac7196a01a23f8f7df07f689",
+                "reference": "6fda3bedb3b705dbac7196a01a23f8f7df07f689",
                 "shasum": ""
             },
             "require": {
@@ -41,6 +41,24 @@
                     "Articulate\\Tests\\": "tests/"
                 }
             },
+            "scripts": {
+                "cs:check": [
+                    "php-cs-fixer fix --dry-run --diff --allow-risky=yes"
+                ],
+                "cs:fix": [
+                    "php-cs-fixer fix --allow-risky=yes"
+                ],
+                "test": [
+                    "phpunit"
+                ],
+                "test:coverage": [
+                    "phpunit --coverage-html=build/coverage"
+                ],
+                "qa": [
+                    "@cs:check",
+                    "@test"
+                ]
+            },
             "authors": [
                 {
                     "name": "denis",
@@ -52,7 +70,7 @@
                 "source": "https://github.com/DenisYu-1/articulate/tree/main",
                 "issues": "https://github.com/DenisYu-1/articulate/issues"
             },
-            "time": "2025-12-05T08:49:49+00:00"
+            "time": "2025-12-14T14:25:28+00:00"
         },
         {
             "name": "psr/cache",

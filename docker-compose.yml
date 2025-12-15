@@ -33,6 +33,7 @@ services:
       context: .
     volumes:
       - ${PWD}/:/app
+      - ${PWD}/../articulate:/articulate
       - ${PWD}/docker/php.ini:/usr/local/etc/php/conf.d/xdebug.ini
     network_mode: service:ts-rr-test
     environment:
