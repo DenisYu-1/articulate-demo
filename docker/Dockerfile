@@ -15,14 +15,20 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 RUN docker-php-ext-install sockets
 
+# Create non-root user for security
+RUN groupadd -r appuser -g 1001 && \
+    useradd -r -g appuser -u 1001 -m -d /home/appuser -s /bin/bash appuser
+
 COPY --from=builder /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
-COPY composer.* ./
+COPY --chown=appuser:appuser composer.* ./
 RUN composer install --no-scripts
 
-COPY . .
+COPY --chown=appuser:appuser . .
 
 EXPOSE 9000
+
+USER appuser
 
 CMD ["php-fpm"]

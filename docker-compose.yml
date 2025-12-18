@@ -16,6 +16,8 @@ services:
       - net_admin
       - sys_module
     restart: unless-stopped
+    networks:
+      - default
 
   nginx:
     image: nginx:alpine
@@ -25,7 +27,8 @@ services:
       - ${PWD}/docker/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
-    network_mode: service:ts-rr-test
+    networks:
+      - default
 
   php:
     build:
@@ -35,7 +38,8 @@ services:
       - ${PWD}/:/app
       - ${PWD}/../articulate:/articulate
       - ${PWD}/docker/php.ini:/usr/local/etc/php/conf.d/xdebug.ini
-    network_mode: service:ts-rr-test
+    networks:
+      - default
     environment:
       - PHP_IDE_CONFIG=serverName=orm
     depends_on:
@@ -49,7 +53,7 @@ services:
       MYSQL_USER: ${DATABASE_USER}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -60,11 +64,14 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5434:5432"
+      - "5433:5432"
     volumes:
       - pgsql_data:/var/lib/postgresql
 
 volumes:
   mysql_data:
   pgsql_data:
+
+networks:
+  default:
 
