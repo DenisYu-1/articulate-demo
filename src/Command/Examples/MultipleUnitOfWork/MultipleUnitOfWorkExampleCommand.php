@@ -33,7 +33,6 @@ final class MultipleUnitOfWorkExampleCommand extends Command
         $user->status = 'active';
 
         $this->entityManager->persist($user);
-        $this->entityManager->flush();
         $io->success("Created user: {$user->name} (id={$user->id})");
 
         $postEntityManager = $this->entityManager->createUnitOfWork();
