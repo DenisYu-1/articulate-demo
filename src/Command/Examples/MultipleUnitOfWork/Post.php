@@ -14,7 +14,7 @@ class Post
 {
     #[PrimaryKey]
     #[AutoIncrement]
-    public ?int $id = null;
+    private ?int $id = null;
 
     #[Property(maxLength: 255)]
     public string $title;

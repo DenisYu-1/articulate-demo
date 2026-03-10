@@ -51,13 +51,6 @@ final class MultipleUnitOfWorkExampleCommand extends Command
             $postEntityManager->clear();
         }
 
-        $userFromPrimary = $this->entityManager->find(User::class, $user->id);
-        if ($userFromPrimary === null) {
-            $io->error("User not found in primary EM after loop");
-            return Command::FAILURE;
-        }
-        $io->success("User still in primary EM identity map: {$userFromPrimary->name}");
-
         return Command::SUCCESS;
     }
 }
