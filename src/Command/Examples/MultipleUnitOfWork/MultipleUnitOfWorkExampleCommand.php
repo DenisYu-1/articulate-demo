@@ -36,24 +36,19 @@ final class MultipleUnitOfWorkExampleCommand extends Command
         $this->entityManager->flush();
         $io->success("Created user: {$user->name} (id={$user->id})");
 
-        $postEntityManager = new EntityManager($this->connection);
+        $postEntityManager = $this->entityManager->createUnitOfWork();
 
         for ($i = 1; $i <= 10; $i++) {
-            $author = $postEntityManager->find(User::class, $user->id);
-            if ($author === null) {
-                $io->error("User not found in secondary EM");
-                return Command::FAILURE;
-            }
-
             $post = new Post();
             $post->title = "Post #{$i}";
             $post->content = "Content for post {$i}";
             $post->createdAt = (new \DateTime())->format('Y-m-d H:i:s');
-            $post->author = $author;
+            $post->author = $user;
 
             $postEntityManager->persist($post);
-            $postEntityManager->flushAndClear();
+            $this->entityManager->flush();
             $io->text("Created post #{$i}");
+            $postEntityManager->clear();
         }
 
         $userFromPrimary = $this->entityManager->find(User::class, $user->id);
