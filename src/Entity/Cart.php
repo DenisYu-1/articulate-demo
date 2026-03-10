@@ -13,8 +13,7 @@ class Cart
 {
     #[PrimaryKey]
     #[AutoIncrement]
-    #[Property]
-    public int $id;
+    public ?int $id = null;
 
     #[Property(type: 'float')]
     public float $total;

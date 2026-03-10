@@ -26,6 +26,10 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    Articulate\Modules\Migrations\Generator\MigrationGenerator:
+        arguments:
+            $outputDirectory: '%articulate_migrations_path%'
+
     Articulate\Commands\InitCommand:
         tags: [ 'console.command' ]
 
@@ -47,10 +51,16 @@ services:
             $user: '%env(resolve:DATABASE_USER)%'
             $password: '%env(resolve:DATABASE_PASSWORD)%'
 
-    Articulate\Modules\DatabaseSchemaReader\DatabaseSchemaReader:
+    Articulate\Modules\EntityManager\EntityManager:
+        arguments:
+            $connection: '@Articulate\Connection'
 
-    Articulate\Modules\DatabaseSchemaComparator\DatabaseSchemaComparator:
+    Articulate\Modules\Database\SchemaComparator\DatabaseSchemaComparator:
+        arguments:
+            $databaseSchemaReader: '@Articulate\Modules\Database\SchemaReader\MySqlSchemaReader'
         
-    Articulate\Modules\MigrationsGenerator\MigrationsCommandGenerator:
+    Articulate\Modules\Migrations\Generator\MigrationsCommandGenerator:
 
     Articulate\Schema\SchemaNaming:
+
+    Articulate\Modules\Database\SchemaReader\MySqlSchemaReader:

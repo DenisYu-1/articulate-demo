@@ -10,6 +10,7 @@
         "ext-iconv": "*",
         "ext-pdo": "*",
         "denis/articulate": "dev-main",
+        "denisyu-1/articulate": "dev-small-adjustments",
         "symfony/console": "8.*",
         "symfony/dotenv": "8.*",
         "symfony/flex": "^2",
@@ -55,17 +56,10 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "test": "php vendor/bin/phpunit",
+        "test:coverage": "php vendor/bin/phpunit --configuration=phpunit.coverage.xml --dont-report-useless-tests"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/articulate",
-            "options": {
-                "symlink": false
-            }
-        }
-    ],
     "conflict": {
         "symfony/symfony": "*"
     },

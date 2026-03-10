@@ -13,7 +13,6 @@ class BrokenPhone
 {
     #[PrimaryKey]
     #[AutoIncrement]
-    #[Property]
     public int $id;
 
     #[Property(name: 'number', maxLength: 32, nullable: true)]

@@ -13,8 +13,7 @@ class Phone
 {
     #[PrimaryKey]
     #[AutoIncrement]
-    #[Property]
-    public int $id;
+    public ?int $id = null;
 
     #[Property(maxLength: 32)]
     public string $number;

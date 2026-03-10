@@ -13,8 +13,7 @@ class Group
 {
     #[PrimaryKey]
     #[AutoIncrement]
-    #[Property]
-    public int $id;
+    public ?int $id = null;
 
     #[Property(maxLength: 120)]
     public string $name;
