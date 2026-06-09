@@ -19,6 +19,6 @@ class Group
     public string $name;
 
     #[ManyToMany(ownedBy: 'groups', targetEntity: User::class)]
-    public array $users;
+    public array $users = [];
 }
 

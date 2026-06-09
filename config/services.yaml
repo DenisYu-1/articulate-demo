@@ -45,15 +45,26 @@ services:
         arguments:
             $migrationsPath: '%articulate_migrations_path%'
 
+    Articulate\Commands\ValidateCommand:
+        tags: [ 'console.command' ]
+        arguments:
+            $entitiesPath: '%articulate_entities_path%'
+
     Articulate\Connection:
         arguments:
             $dsn: '%env(resolve:DATABASE_DSN)%'
             $user: '%env(resolve:DATABASE_USER)%'
             $password: '%env(resolve:DATABASE_PASSWORD)%'
 
+    Articulate\Modules\Repository\RepositoryFactory:
+        arguments:
+            $entityManager: '@Articulate\Modules\EntityManager\EntityManager'
+
     Articulate\Modules\EntityManager\EntityManager:
         arguments:
             $connection: '@Articulate\Connection'
+        calls:
+            - setRepositoryFactory: ['@Articulate\Modules\Repository\RepositoryFactory']
 
     Articulate\Modules\Database\SchemaComparator\DatabaseSchemaComparator:
         arguments:

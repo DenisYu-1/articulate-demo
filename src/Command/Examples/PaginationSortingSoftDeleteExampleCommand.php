@@ -29,6 +29,18 @@ final class PaginationSortingSoftDeleteExampleCommand extends Command
         $offsetPage = $repo->findBy([], ['id' => 'ASC'], 2, 1);
         $io->text('Offset pagination (limit=2, offset=1): ' . count($offsetPage) . ' users');
 
+        $activeUsers = $repo->findBy(['status' => 'active'], ['id' => 'ASC']);
+        $io->text('Active users before soft-delete: ' . count($activeUsers));
+
+        if (!empty($activeUsers)) {
+            $activeUsers[0]->status = 'deleted';
+            $this->entityManager->flush();
+            $io->text("Soft-deleted one user: {$activeUsers[0]->email}");
+        }
+
+        $visibleUsers = $repo->findBy(['status' => 'active'], ['id' => 'ASC']);
+        $io->text('Active users after soft-delete: ' . count($visibleUsers));
+
         $cursorResult = $repo->findWithCursor(null, 2, ['id' => 'ASC']);
         $items = $cursorResult->getItems();
         $io->text('Cursor pagination (limit=2): ' . count($items) . ' users');

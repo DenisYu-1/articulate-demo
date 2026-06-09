@@ -3,7 +3,7 @@
 namespace App\Command\Examples\MultipleUnitOfWork;
 
 use App\Entity\User;
-use Articulate\Connection;
+use App\Entity\Post;
 use Articulate\Modules\EntityManager\EntityManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,8 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class MultipleUnitOfWorkExampleCommand extends Command
 {
     public function __construct(
-        private readonly EntityManager $entityManager,
-        private readonly Connection $connection
+        private readonly EntityManager $entityManager
     ) {
         parent::__construct();
     }

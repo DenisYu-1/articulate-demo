@@ -5,7 +5,6 @@ namespace App\Entity;
 use Articulate\Attributes\Entity;
 use Articulate\Attributes\Indexes\AutoIncrement;
 use Articulate\Attributes\Indexes\PrimaryKey;
-use Articulate\Attributes\Lifecycle\PostPersist;
 use Articulate\Attributes\Lifecycle\PrePersist;
 use Articulate\Attributes\Property;
 
@@ -30,8 +29,4 @@ class AuditLog
         }
     }
 
-    #[PostPersist]
-    public function onPostPersist(): void
-    {
-    }
 }

@@ -14,7 +14,7 @@ use Articulate\Attributes\Relations\OneToOne;
 
 #[Entity(tableName: 'users')]
 #[Index(['email'], unique: true, concurrent: true)] // Non-blocking index creation
-#[Index(['created_at', 'status'], concurrent: false)]
+#[Index(['createdAt', 'status'], concurrent: false)]
 class User
 {
     #[PrimaryKey]
