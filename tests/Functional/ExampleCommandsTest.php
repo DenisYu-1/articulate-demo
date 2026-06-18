@@ -81,4 +81,64 @@ class ExampleCommandsTest extends TestCase
         [$exitCode, $content] = $this->runCommand('app:example:pagination-sorting-soft-delete');
         $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
     }
+
+    public function testCatalogCrudCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:catalog:crud');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testCatalogQueryCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:catalog:query');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testCustomersLifecycleCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:customers:lifecycle');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testCustomersBrowseCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:customers:browse');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testCustomersSoftDeleteCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:customers:soft-delete');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testCustomersCrossEntityCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:customers:cross-entity');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testOrdersPlaceCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:orders:place');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testOrdersQueryCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:orders:query');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testOrdersDeadlockCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:orders:deadlock');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testTaggingDemoCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:tagging:demo');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
 }

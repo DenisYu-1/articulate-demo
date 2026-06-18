@@ -16,6 +16,19 @@ Articulate maps plain PHP classes to database tables using PHP 8 attributes. No 
 - Custom PHP↔DB type converters
 - Schema diff and migration generation
 
+## Later To Be Checked
+
+- `later-to-be-checked`: UUID primary key generation currently happens during insert/flush, not during `persist()`. Orders demo assigns UUID after scheduling the insert and before `flush()` so the row is still inserted and the ID is available pre-flush.
+- `later-to-be-checked`: First `persist()` of an entity with an explicit ID marks it managed without scheduling an INSERT. Library side should distinguish new explicit-ID entities from loaded managed entities.
+- `later-to-be-checked`: `where('column', null)` compiles to `column = ?` with a null parameter. Use `whereNull()` until null comparisons compile to `IS NULL`.
+- `later-to-be-checked`: `QueryBuilder::chunk()` is referenced by docs/examples but is missing in the installed Articulate dependency.
+- `later-to-be-checked`: `EntityManager::transactional()` has no retry/max retry arguments, while `Connection::transactional()` does. Orders deadlock demo uses deterministic lock order and rollback checks instead of a real retrying concurrent deadlock fixture.
+- `later-to-be-checked`: Relation eager loading is still explicit/manual in demo code. Orders query command shows N+1-style `loadRelation()` calls and a manual batch query workaround.
+- `later-to-be-checked`: Owning `ManyToOne` relation columns need careful scalar FK pairing for hydration and insert scheduling. Setting both scalar FK and relation object before insert can duplicate the FK column, so Orders leaves scalar FK null and lets the relation provide the insert value.
+- `later-to-be-checked`: `EntityManager::loadRelation()` returns `null` for `MorphToMany` / `MorphedByMany` metadata because `RelationshipLoader` only handles `ReflectionRelation` after the many-to-many branch. Tagging demo keeps morph attributes but uses direct pivot queries.
+- `later-to-be-checked`: `MorphToMany` default target join column for `Tag` resolves to `tags_id`; demo sets `targetIdColumn: 'tag_id'` to match the documented pivot shape.
+- `later-to-be-checked`: `compareMorphToManyTable()` hardcodes polymorphic owner id columns as `int`; Tagging needs `VARCHAR(36)` because `taggable_id` stores both order UUIDs and customer integer ids.
+
 ## Why Articulate Instead of Doctrine?
 
 Doctrine ORM is mature and full-featured, but carries significant weight: generated proxies, complex metadata drivers, a second-level cache layer, and a steep learning curve for teams new to ORM patterns.
@@ -59,7 +72,7 @@ Articulate\Modules\EntityManager\EntityManager:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `articulate_entities_path` | `src/Entity` | Directory scanned for `#[Entity]` classes |
-| `articulate_migrations_path` | `migrations` | Directory where migration files are written |
+| `articulate_migrations_path` | `migrations/%env(database_driver:resolve:DATABASE_DSN)%` | Driver-specific directory where migration files are written |
 | `articulate_migrations_namespace` | `App\Migrations` | PHP namespace for generated migration classes |
 
 ## Quick Start
@@ -248,9 +261,11 @@ Configure paths:
 ```yaml
 parameters:
     articulate_entities_path: 'src/Entity'
-    articulate_migrations_path: 'migrations'
+    articulate_migrations_path: 'migrations/%env(database_driver:resolve:DATABASE_DSN)%'
     articulate_migrations_namespace: 'App\Migrations'
 ```
+
+The demo stores migrations under `migrations/mysql` and `migrations/pgsql`. The active folder is derived from the PDO driver in `DATABASE_DSN`.
 
 The first `articulate:diff` on a clean database generates migrations for all entity tables. Subsequent runs generate only the delta.
 

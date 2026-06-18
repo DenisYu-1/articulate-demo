@@ -4,8 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    articulate_entities_path: 'src/Entity'
-    articulate_migrations_path: 'migrations'
+    articulate_entities_path: 'src'
+    articulate_migrations_path: 'migrations/%env(database_driver:resolve:DATABASE_DSN)%'
     articulate_migrations_namespace: 'App\Migrations'
 
 services:
@@ -21,10 +21,14 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Feature/*/Entity/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\DependencyInjection\DatabaseDriverEnvVarProcessor:
+        tags: [ 'container.env_var_processor' ]
 
     Articulate\Modules\Migrations\Generator\MigrationGenerator:
         arguments:
@@ -44,6 +48,7 @@ services:
         tags: [ 'console.command' ]
         arguments:
             $migrationsPath: '%articulate_migrations_path%'
+            $entitiesPath: '%articulate_entities_path%'
 
     Articulate\Commands\ValidateCommand:
         tags: [ 'console.command' ]
@@ -68,10 +73,17 @@ services:
 
     Articulate\Modules\Database\SchemaComparator\DatabaseSchemaComparator:
         arguments:
-            $databaseSchemaReader: '@Articulate\Modules\Database\SchemaReader\MySqlSchemaReader'
+            $databaseSchemaReader: '@Articulate\Modules\Database\SchemaReader\DatabaseSchemaReaderInterface'
         
     Articulate\Modules\Migrations\Generator\MigrationsCommandGenerator:
 
     Articulate\Schema\SchemaNaming:
 
     Articulate\Modules\Database\SchemaReader\MySqlSchemaReader:
+
+    Articulate\Modules\Database\SchemaReader\PostgresqlSchemaReader:
+
+    Articulate\Modules\Database\SchemaReader\DatabaseSchemaReaderInterface:
+        factory: [ 'Articulate\Modules\Database\SchemaReader\SchemaReaderFactory', 'create' ]
+        arguments:
+            $connection: '@Articulate\Connection'

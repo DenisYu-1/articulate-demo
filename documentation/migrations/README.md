@@ -15,9 +15,11 @@ Schema diffing and migration generation.
 ```yaml
 parameters:
     articulate_entities_path: 'src/Entity'
-    articulate_migrations_path: 'migrations'
+    articulate_migrations_path: 'migrations/%env(database_driver:resolve:DATABASE_DSN)%'
     articulate_migrations_namespace: 'App\Migrations'
 ```
+
+The active migration directory is derived from the PDO driver in `DATABASE_DSN`. A MySQL DSN uses `migrations/mysql`; a PostgreSQL DSN uses `migrations/pgsql`.
 
 ## Workflow (Clean Database)
 
