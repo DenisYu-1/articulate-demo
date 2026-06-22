@@ -2,13 +2,13 @@
 
 Domain: **e-commerce shop** (products, customers, orders). Realistic enough to motivate every ORM pattern without being contrived.
 
-Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and any supporting classes. Entities map to shared DB tables — articulate supports multiple entity classes on the same table, so features declare only the columns they need.
+Each feature lives in `src/Features/<Name>/` and owns its entities, commands, and any supporting classes. Entities map to shared DB tables — articulate supports multiple entity classes on the same table, so features declare only the columns they need.
 
 ---
 
 ## Feature: Catalog — DONE
 
-**Status:** Implemented in `src/Feature/Catalog/`; schema is managed by migration `Migration20260616000100Catalog`.
+**Status:** Implemented in `src/Features/Catalog/`; schema is managed by migration `Migration20260616000100Catalog`.
 
 **Domain:** Products, categories, and inventory.
 
@@ -36,7 +36,7 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 
 ## Feature: CustomerAccounts
 
-**Status:** Implemented in `src/Feature/CustomerAccounts/`; schema is managed by migration `Migration20260616000200CustomerAccounts`.
+**Status:** Implemented in `src/Features/CustomerAccounts/`; schema is managed by migration `Migration20260616000200CustomerAccounts`.
 
 **Implementation notes:** Current Articulate `remove()` schedules a physical delete, so the soft-delete command demonstrates logical deletion via managed `deleted_at` update while still showing `PreRemove`/`PostRemove` on a disposable physical-delete row. Lazy relation proxies also cannot be flushed safely in this release, so the address relation demo uses explicit/eager relation loading. Snake_case entity fields intentionally keep explicit `#[Property(name: ...)]` mappings until the hydrator fallback fix is available in this demo dependency.
 
@@ -112,7 +112,7 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 
 ## Feature: Orders
 
-**Status:** Implemented in `src/Feature/Orders/`; schema is managed by migration `Migration20260616000300Orders`.
+**Status:** Implemented in `src/Features/Orders/`; schema is managed by migration `Migration20260616000300Orders`.
 
 **Implementation notes:** Current Articulate UUID generation happens in `QueryExecutor::executeInsert()`, so the demo schedules the order insert while the primary key is still null, then assigns a UUID before `flush()` to keep the insert scheduled and still show a pre-flush UUID. `where('shipped_at', null)` currently compiles as `= ?` with a null parameter, so `app:orders:query` prints that SQL and uses `whereNull()` for the working null comparison. The deadlock command demonstrates transaction-required locking, rollback, and deterministic lock ordering without creating a real concurrent database deadlock.
 
@@ -152,7 +152,7 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 
 ## Feature: Tagging
 
-**Status:** Implemented in `src/Feature/Tagging/`; schema is managed by migration `Migration20260616000400Tagging`.
+**Status:** Implemented in `src/Features/Tagging/`; schema is managed by migration `Migration20260616000400Tagging`.
 
 **Implementation notes:** Current Articulate metadata supports `MorphToMany` / `MorphedByMany`, but `EntityManager::loadRelation()` returns `null` for those relation objects in this dependency, so the runnable command keeps the attributes and queries the `taggables` pivot directly. The demo sets `targetIdColumn: 'tag_id'` explicitly because the default would be `tags_id`. The migration stores `taggable_id` as `VARCHAR(36)` because the same polymorphic column must hold order UUIDs and customer integer ids; current schema comparison hardcodes this column as `int`, so recheck after ORM fixes.
 
@@ -182,11 +182,22 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 
 ## Feature: Analytics
 
+**Status:** Implemented in `src/Features/Analytics/`; no schema migration is required because the feature uses read-only projections over the existing `orders`, `order_items`, and `products` tables.
+
+**Implementation notes:** `OrderItemSnapshot` includes the physical `id` primary key even though reports group by physical `order_id`/`product_id` columns; projection entities still need primary-key metadata for clean hydration, identity map registration, `find()`, and L2 cache behavior. It intentionally does not map `order_id` as a scalar property because `OrderItem::$order` owns that FK column in the write model. `app:analytics:report` creates local instrumented `EntityManager` instances so it can demonstrate result-cache hits and L2 cache scope without changing the app-wide `Connection` service. `app:analytics:batch` uses a limit/offset fallback because the installed Articulate dependency documents and examples `QueryBuilder::chunk()`, but this version does not expose that method.
+
+**Pending library recheck / fixes:**
+- `QueryBuilder::chunk()` is documented and used by `app:example:advanced-querying`, but is missing from the installed library class.
+- Normal aggregate/specific-column `QueryBuilder` selects force raw array hydration before custom hydrators can run, so `ScalarHydrator` and `PartialHydrator` are only demonstrable through raw SQL workarounds.
+- `ScalarHydrator` returns scalar values, but `QueryResultExecutor` still calls `UnitOfWork::registerManaged()` when a UnitOfWork is attached, causing a type error (`int given`) instead of returning scalar rows cleanly.
+- `PartialHydrator::hydrate()` delegates to `ObjectHydrator::hydrate($class, [])`, which registers a transient empty-id entity before partial fields are applied; this should be rechecked before recommending it for production partial reads.
+- `Connection` accepts a `QueryLoggerInterface` only at construction time, so command-level query logging currently requires constructing an instrumented connection instead of temporarily attaching a logger to the existing service.
+
 **Domain:** Reporting over orders and products. Uses read-side projection entities — lighter classes mapping the same tables with only the columns needed for reporting.
 
 **Entities:**
 - `OrderSnapshot` — maps `orders` table; fields: `id`, `status`, `placed_at`. Read-only projection; no relations.
-- `OrderItemSnapshot` — maps `order_items` table; fields: `order_id`, `product_id`, `quantity`, `unit_price`.
+- `OrderItemSnapshot` — maps `order_items` table; fields: `id`, `product_id`, `quantity`, `unit_price`; queries can still filter on the physical `order_id` column without mapping it as a scalar property.
 - `ProductSnapshot` — maps `products` table; fields: `id`, `name`, `category_id`. For joining in reports.
 
 **Commands:**
@@ -211,10 +222,14 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 
 ## Feature: BulkImport
 
+**Status:** Implemented in `src/Features/BulkImport/`; no schema migration is required because the feature writes through projections over the existing `categories` and `products` tables.
+
+**Implementation notes:** The shared `products` table has a non-null `slug` column from the Catalog feature, so `ImportProduct` maps and populates `slug` in addition to the columns listed in the original plan. The command defaults to the planned 5k products per strategy, and supports `--count` / `--batch-size` for faster smoke runs.
+
 **Domain:** Importing a large product catalog from an external source (simulated with generated data).
 
 **Entities:**
-- `ImportProduct` — maps `products` table; declares all columns needed for import (`sku`, `name`, `category_id`, `status`, `price`). Different class than Catalog's `Product` — demonstrates two feature-local entity classes writing the same table.
+- `ImportProduct` — maps `products` table; declares all columns needed for import (`sku`, `name`, `slug`, `category_id`, `status`, `price`). Different class than Catalog's `Product` — demonstrates two feature-local entity classes writing the same table.
 - `ImportCategory` — maps `categories` table; used as anchor entity held in the primary `EntityManager` across batches.
 
 **Commands:**
@@ -242,6 +257,24 @@ Each feature lives in `src/Feature/<Name>/` and owns its entities, commands, and
 | Tagging          | Tag, TaggableOrder, TaggableCustomer                          | MorphToMany, MorphedByMany, MorphTypeRegistry                                 |
 | Analytics        | OrderSnapshot, OrderItemSnapshot, ProductSnapshot             | result cache, query logger, chunk, aggregates, hydrators, L2 scope            |
 | BulkImport       | ImportProduct, ImportCategory                                 | scoped unit of work, memory-bounded batching                                  |
+
+---
+
+## README updates
+
+**Status:** In progress. Keep `README.md` aligned with this plan as the demo grows so readers can find each feature quickly and can distinguish supported mapping patterns from temporary library-fix fixtures.
+
+**Feature guide:** Add a compact README section that points to each feature directory, runnable command, migration/projection source, and the main library behavior demonstrated:
+- Catalog: `src/Features/Catalog/`, `app:catalog:crud`, `app:catalog:query`, `Migration20260616000100Catalog`
+- CustomerAccounts: `src/Features/CustomerAccounts/`, `app:customers:*`, `Migration20260616000200CustomerAccounts`
+- Orders: `src/Features/Orders/`, `app:orders:*`, `Migration20260616000300Orders`
+- Tagging: `src/Features/Tagging/`, `app:tagging:demo`, `Migration20260616000400Tagging`
+- Analytics: `src/Features/Analytics/`, `app:analytics:*`, read-only projections over existing order/product tables
+- BulkImport: `src/Features/BulkImport/`, `app:import:run`, write-side projections over existing catalog tables
+
+**Relation column contract:** README explicitly states that a relation-owned FK column must not also be mapped as a scalar `#[Property]` on the same entity. Example: an owning `#[ManyToOne(column: 'customer_id')] public ?Customer $customer` and `#[Property(name: 'customer_id')] public ?int $customerId` on the same class is invalid and should fail `articulate:validate`.
+
+**Post-library-fix cleanup:** The temporary duplicate mappings were removed from Orders after the library-side validation message was improved and covered by tests. README examples should continue to use relation properties or scalar FK properties exclusively, never both for the same column.
 
 ---
 

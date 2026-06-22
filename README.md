@@ -24,7 +24,7 @@ Articulate maps plain PHP classes to database tables using PHP 8 attributes. No 
 - `later-to-be-checked`: `QueryBuilder::chunk()` is referenced by docs/examples but is missing in the installed Articulate dependency.
 - `later-to-be-checked`: `EntityManager::transactional()` has no retry/max retry arguments, while `Connection::transactional()` does. Orders deadlock demo uses deterministic lock order and rollback checks instead of a real retrying concurrent deadlock fixture.
 - `later-to-be-checked`: Relation eager loading is still explicit/manual in demo code. Orders query command shows N+1-style `loadRelation()` calls and a manual batch query workaround.
-- `later-to-be-checked`: Owning `ManyToOne` relation columns need careful scalar FK pairing for hydration and insert scheduling. Setting both scalar FK and relation object before insert can duplicate the FK column, so Orders leaves scalar FK null and lets the relation provide the insert value.
+- `later-to-be-checked`: Relation-owned FK columns must not also be mapped as scalar `#[Property]` fields on the same entity. `articulate:validate` reports duplicate relation/scalar mappings explicitly.
 - `later-to-be-checked`: `EntityManager::loadRelation()` returns `null` for `MorphToMany` / `MorphedByMany` metadata because `RelationshipLoader` only handles `ReflectionRelation` after the many-to-many branch. Tagging demo keeps morph attributes but uses direct pivot queries.
 - `later-to-be-checked`: `MorphToMany` default target join column for `Tag` resolves to `tags_id`; demo sets `targetIdColumn: 'tag_id'` to match the documented pivot shape.
 - `later-to-be-checked`: `compareMorphToManyTable()` hardcodes polymorphic owner id columns as `int`; Tagging needs `VARCHAR(36)` because `taggable_id` stores both order UUIDs and customer integer ids.
@@ -65,6 +65,7 @@ Articulate\Modules\EntityManager\EntityManager:
 | `DATABASE_USER` | `user` | Database username |
 | `DATABASE_PASSWORD` | `secret` | Database password |
 | `DATABASE_NAME` | `mydb` | Database name (referenced inside DSN) |
+| `ARTICULATE_MIGRATIONS_PATH` | `migrations/mysql` | Directory where migration files are read and written |
 | `APP_ENV` | `dev` / `test` | Symfony environment; test env uses `.env.test` overrides |
 
 **services.yaml parameters** (migration commands)
@@ -72,7 +73,7 @@ Articulate\Modules\EntityManager\EntityManager:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `articulate_entities_path` | `src/Entity` | Directory scanned for `#[Entity]` classes |
-| `articulate_migrations_path` | `migrations/%env(database_driver:resolve:DATABASE_DSN)%` | Driver-specific directory where migration files are written |
+| `articulate_migrations_path` | `%env(resolve:ARTICULATE_MIGRATIONS_PATH)%` | Directory where migration files are read and written |
 | `articulate_migrations_namespace` | `App\Migrations` | PHP namespace for generated migration classes |
 
 ## Quick Start
@@ -84,6 +85,19 @@ docker compose exec php bin/console articulate:diff
 docker compose exec php bin/console articulate:migrate
 docker compose exec php bin/console app:example:basic-crud
 ```
+
+## Feature Guide
+
+The demo is organized by feature under `src/Features/<Name>/`. Each feature owns its entities, commands, and supporting classes while sharing database tables where that is useful.
+
+| Feature | Where to look | Run | What it demonstrates |
+|---------|---------------|-----|----------------------|
+| Catalog | `src/Features/Catalog/`, `Migration20260616000100Catalog` | `app:catalog:crud`, `app:catalog:query` | property mapping, indexes, custom enum conversion, many-to-many products/categories, basic queries |
+| CustomerAccounts | `src/Features/CustomerAccounts/`, `Migration20260616000200CustomerAccounts` | `app:customers:lifecycle`, `app:customers:browse`, `app:customers:soft-delete`, `app:customers:cross-entity` | lifecycle callbacks, repositories, soft-delete behavior, cursor pagination, same-table entity projections |
+| Orders | `src/Features/Orders/`, `Migration20260616000300Orders` | `app:orders:place`, `app:orders:query`, `app:orders:deadlock` | transactions, pessimistic locks, UUID primary keys, order/item relations, complex query builder usage |
+| Tagging | `src/Features/Tagging/`, `Migration20260616000400Tagging` | `app:tagging:demo` | polymorphic many-to-many tags, morph aliases, pivot-table queries |
+| Analytics | `src/Features/Analytics/` | `app:analytics:report`, `app:analytics:batch` | read-only projections, aggregates, result cache, query logging, batch iteration |
+| BulkImport | `src/Features/BulkImport/` | `app:import:run` | write-side projections, scoped units of work, bounded-memory imports |
 
 ---
 
@@ -134,6 +148,19 @@ public ?Cart $cart = null;
 Available: `#[OneToOne]`, `#[OneToMany]`, `#[ManyToOne]`, `#[ManyToMany]`, and polymorphic variants (`MorphTo`, `MorphOne`, `MorphMany`, `MorphToMany`, `MorphedByMany`).
 
 Relations load automatically during hydration. Use `loadRelation($entity, $relationName)` to load explicitly.
+
+Relation-owned FK columns must be mapped by the relation only. Do not also map the same column as a scalar `#[Property]` on that entity:
+
+```php
+// Invalid: both properties map customer_id on the same entity.
+#[Property(name: 'customer_id')]
+public ?int $customerId = null;
+
+#[ManyToOne(targetEntity: Customer::class, column: 'customer_id')]
+public ?Customer $customer = null;
+```
+
+Use either relation access or scalar FK access for a column, not both. `articulate:validate` should reject duplicate relation/scalar mappings.
 
 → [Relationships docs](documentation/relationships/README.md)
 
@@ -261,11 +288,11 @@ Configure paths:
 ```yaml
 parameters:
     articulate_entities_path: 'src/Entity'
-    articulate_migrations_path: 'migrations/%env(database_driver:resolve:DATABASE_DSN)%'
+    articulate_migrations_path: '%env(resolve:ARTICULATE_MIGRATIONS_PATH)%'
     articulate_migrations_namespace: 'App\Migrations'
 ```
 
-The demo stores migrations under `migrations/mysql` and `migrations/pgsql`. The active folder is derived from the PDO driver in `DATABASE_DSN`.
+The demo stores migrations under `migrations/mysql` and `migrations/pgsql`. Set `ARTICULATE_MIGRATIONS_PATH` to the folder that matches `DATABASE_DSN`; when switching database engines, change the environment variables and restart the containers before running the standard migration commands.
 
 The first `articulate:diff` on a clean database generates migrations for all entity tables. Subsequent runs generate only the delta.
 

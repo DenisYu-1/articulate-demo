@@ -9,7 +9,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo": "*",
-        "denisyu-1/articulate": "dev-main",
+        "denisyu-1/articulate": "dev-improvements",
         "symfony/console": "8.*",
         "symfony/dotenv": "8.*",
         "symfony/flex": "^2",
@@ -69,6 +69,7 @@
         }
     },
     "require-dev": {
+        "deptrac/deptrac": "^4.6",
         "phpunit/phpunit": "^13.0"
     }
 }

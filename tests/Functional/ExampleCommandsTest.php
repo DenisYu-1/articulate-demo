@@ -20,14 +20,17 @@ class ExampleCommandsTest extends TestCase
         }
     }
 
-    private function runCommand(string $commandName): array
+    /**
+     * @param array<string, mixed> $arguments
+     */
+    private function runCommand(string $commandName, array $arguments = []): array
     {
         $kernel = new \App\Kernel($_ENV['APP_ENV'] ?? 'test', (bool) ($_ENV['APP_DEBUG'] ?? false));
         $kernel->boot();
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $input = new ArrayInput(['command' => $commandName]);
+        $input = new ArrayInput(['command' => $commandName] + $arguments);
         $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
         $exitCode = $application->run($input, $output);
 
@@ -139,6 +142,27 @@ class ExampleCommandsTest extends TestCase
     public function testTaggingDemoCommandRunsSuccessfully(): void
     {
         [$exitCode, $content] = $this->runCommand('app:tagging:demo');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testAnalyticsReportCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:analytics:report');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testAnalyticsBatchCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:analytics:batch');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
+    public function testBulkImportRunCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:import:run', [
+            '--count' => 40,
+            '--batch-size' => 10,
+        ]);
         $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
     }
 }
