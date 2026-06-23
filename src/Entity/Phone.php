@@ -21,7 +21,9 @@ class Phone
     #[Property(maxLength: 32)]
     public string $label;
 
-    #[ManyToOne(targetEntity: User::class, referencedBy: 'phones')]
-    public User $user;
-}
+    #[Property(maxLength: 64)]
+    public string $status = 'active';
 
+    #[ManyToOne(targetEntity: User::class, referencedBy: 'phones')]
+    public ?User $user = null;
+}

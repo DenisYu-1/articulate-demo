@@ -56,6 +56,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "docs:links": "php tools/check-markdown-links.php",
         "test": "php vendor/bin/phpunit",
         "test:coverage": "php vendor/bin/phpunit --configuration=phpunit.coverage.xml --dont-report-useless-tests"
     },

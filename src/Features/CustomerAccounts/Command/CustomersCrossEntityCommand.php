@@ -2,9 +2,13 @@
 
 namespace App\Features\CustomerAccounts\Command;
 
+use App\Features\Analytics\Diagnostics\CountingQueryLogger;
 use App\Features\CustomerAccounts\Entity\Customer;
 use App\Features\CustomerAccounts\Entity\CustomerSummary;
+use Articulate\Connection;
 use Articulate\Modules\EntityManager\EntityManager;
+use Articulate\Modules\QueryBuilder\Filter\SoftDeleteFilter;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -59,8 +63,7 @@ final class CustomersCrossEntityCommand extends Command
         $io->text('CustomerSummary after clear/refetch: ' . ($freshSummary instanceof CustomerSummary ? $freshSummary->name : 'missing'));
 
         $this->demonstrateMergedUpdate($io, $customerId);
-        $this->demonstrateRemoveEvictsSummary($io, $suffix);
-        $this->demonstrateReverseRemoveEvictsCustomer($io, $suffix);
+        $this->demonstrateSecondLevelCacheSiblingEviction($io, $suffix);
 
         $summaryRepository = $this->entityManager->getRepository(CustomerSummary::class);
         $io->text('Entity without repositoryClass uses: ' . basename(str_replace('\\', '/', $summaryRepository::class)));
@@ -93,53 +96,85 @@ final class CustomersCrossEntityCommand extends Command
         $io->text('Same-column conflict winner: ' . ($fresh instanceof Customer ? $fresh->name : 'missing'));
     }
 
-    private function demonstrateRemoveEvictsSummary(SymfonyStyle $io, string $suffix): void
+    private function demonstrateSecondLevelCacheSiblingEviction(SymfonyStyle $io, string $suffix): void
     {
+        $io->section('Second-level cache sibling eviction');
+
         $customer = $this->createCustomerWithAddress(
-            'Remove Customer',
-            "remove-customer-{$suffix}@example.test",
-            "Remove Customer {$suffix}",
+            'L2 Original Customer',
+            "l2-cross-{$suffix}@example.test",
+            "L2 Cross {$suffix}",
         );
         $customerId = $customer->id;
         $this->entityManager->clear();
 
-        $customer = $this->entityManager->find(Customer::class, $customerId);
-        $summary = $this->entityManager->find(CustomerSummary::class, $customerId);
+        $pool = new ArrayAdapter();
+        $readerLogger = new CountingQueryLogger();
+        $readerEm = $this->createL2EntityManager($readerLogger, $pool);
+        $writerEm = $this->createL2EntityManager(null, $pool);
 
-        if (!$customer instanceof Customer || !$summary instanceof CustomerSummary) {
-            throw new \RuntimeException('Cannot demonstrate Customer removal.');
+        $readerLogger->reset();
+        $readerEm->find(Customer::class, $customerId);
+        $readerEm->find(CustomerSummary::class, $customerId);
+        $warmQueries = $readerLogger->count();
+        $readerEm->clear();
+
+        $readerLogger->reset();
+        $readerEm->find(Customer::class, $customerId);
+        $readerSummaryBefore = $readerEm->find(CustomerSummary::class, $customerId);
+        $cacheHitQueries = $readerLogger->count();
+        $readerEm->clear();
+
+        // Load both sibling classes in the writing context so the metadata
+        // registry knows every entity class that maps the customers table.
+        $writerCustomer = $writerEm->find(Customer::class, $customerId);
+        $writerEm->find(CustomerSummary::class, $customerId);
+
+        if (!$writerCustomer instanceof Customer || !$readerSummaryBefore instanceof CustomerSummary) {
+            throw new \RuntimeException('Cannot demonstrate L2 sibling eviction.');
         }
 
-        $this->entityManager->remove($customer);
-        $this->entityManager->flush();
-        $this->entityManager->clear();
+        $writerCustomer->name = 'L2 Updated For All Contexts';
+        $writerEm->flush();
+        $writerEm->clear();
 
-        $summaryAfterDelete = $this->entityManager->find(CustomerSummary::class, $customerId);
-        $io->text('remove(Customer) then find(CustomerSummary): ' . ($summaryAfterDelete instanceof CustomerSummary ? 'visible' : 'null'));
+        $readerLogger->reset();
+        $readerCustomerAfter = $readerEm->find(Customer::class, $customerId);
+        $readerSummaryAfter = $readerEm->find(CustomerSummary::class, $customerId);
+        $afterUpdateQueries = $readerLogger->count();
+
+        $io->definitionList(
+            ['warm Customer + CustomerSummary cache entries' => "{$warmQueries} query(s)"],
+            ['reader context before update' => "{$cacheHitQueries} query(s), summary='{$readerSummaryBefore->name}'"],
+            ['writer context updated Customer.name' => $writerCustomer->name],
+            ['reader Customer after writer flush' => $readerCustomerAfter instanceof Customer ? $readerCustomerAfter->name : 'missing'],
+            ['reader CustomerSummary after writer flush' => $readerSummaryAfter instanceof CustomerSummary ? $readerSummaryAfter->name : 'missing'],
+            ['reader reload queries after writer flush' => "{$afterUpdateQueries} query(s)"],
+        );
     }
 
-    private function demonstrateReverseRemoveEvictsCustomer(SymfonyStyle $io, string $suffix): void
+    private function createL2EntityManager(?CountingQueryLogger $logger, ArrayAdapter $pool): EntityManager
     {
-        $customer = $this->createCustomerWithAddress(
-            'Reverse Remove Customer',
-            "remove-summary-{$suffix}@example.test",
-            "Remove Summary {$suffix}",
+        $connection = new Connection(
+            $this->env('DATABASE_DSN'),
+            $this->env('DATABASE_USER'),
+            $this->env('DATABASE_PASSWORD'),
+            $logger,
         );
-        $customerId = $customer->id;
-        $this->entityManager->clear();
 
-        $summary = $this->entityManager->find(CustomerSummary::class, $customerId);
-        $customer = $this->entityManager->find(Customer::class, $customerId);
+        $entityManager = new EntityManager($connection, secondLevelCache: $pool);
+        $entityManager->getFilters()->add('soft_delete', new SoftDeleteFilter());
 
-        if (!$customer instanceof Customer || !$summary instanceof CustomerSummary) {
-            throw new \RuntimeException('Cannot demonstrate CustomerSummary removal.');
+        return $entityManager;
+    }
+
+    private function env(string $name): string
+    {
+        $value = $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
+        if (!is_string($value) || $value === '') {
+            throw new \RuntimeException("Missing required environment variable {$name}.");
         }
 
-        $this->entityManager->remove($summary);
-        $this->entityManager->flush();
-        $this->entityManager->clear();
-
-        $customerAfterDelete = $this->entityManager->find(Customer::class, $customerId);
-        $io->text('remove(CustomerSummary) then find(Customer): ' . ($customerAfterDelete instanceof Customer ? 'visible' : 'null'));
+        return $value;
     }
 }

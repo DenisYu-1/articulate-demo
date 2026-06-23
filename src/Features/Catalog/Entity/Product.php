@@ -9,6 +9,8 @@ use Articulate\Attributes\Indexes\Index;
 use Articulate\Attributes\Indexes\PrimaryKey;
 use Articulate\Attributes\Property;
 use Articulate\Attributes\Relations\ManyToMany;
+use Articulate\Attributes\Relations\MappingTable;
+use Articulate\Attributes\Relations\MappingTableProperty;
 use Articulate\Modules\EntityManager\Collection;
 
 #[Entity(tableName: 'products')]
@@ -41,7 +43,18 @@ final class Product
     #[Property]
     public float $price;
 
-    #[ManyToMany(targetEntity: Category::class, referencedBy: 'products')]
+    #[ManyToMany(
+        targetEntity: Category::class,
+        referencedBy: 'products',
+        mappingTable: new MappingTable(
+            name: 'categories_products',
+            properties: [
+                new MappingTableProperty('is_primary', 'int', defaultValue: '0'),
+                new MappingTableProperty('position', 'int', defaultValue: '0'),
+                new MappingTableProperty('assigned_at', 'datetime', nullable: true),
+            ],
+        ),
+    )]
     public array|Collection $categories = [];
 
     public function setStatus(ProductStatus $status): void

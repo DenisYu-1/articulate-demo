@@ -1,30 +1,49 @@
 # Migrations Workflow
 
-Demonstrates articulate:init, articulate:diff, and articulate:migrate end-to-end.
+## What It Demonstrates
 
-**Read details:** [Migrations](../../documentation/migrations/README.md)
+The migration lifecycle: initialize migration tracking, generate diffs when entity metadata changes, and apply checked-in migrations.
 
 ## Prerequisites
 
-- Docker services running
-- Clean or existing database
+- Docker services running.
+- Database configured through the demo environment variables.
 
-## Run
+## Run Command
 
 ```bash
-bin/console articulate:init
-bin/console articulate:diff
-bin/console articulate:migrate
+./examples/migrations-workflow/run.sh
 ```
 
-Or via Docker:
+Equivalent command:
 
 ```bash
-docker compose exec php bin/console articulate:init
-docker compose exec php bin/console articulate:diff
+docker compose exec php bin/console app:example:migrations-workflow
+```
+
+For a clean checkout, the real migration command is:
+
+```bash
 docker compose exec php bin/console articulate:migrate
 ```
 
-## Expected Result
+## Expected Output
 
-Creates migration tracking table, generates migrations from entity diff, and applies them.
+The example prints the migration workflow. `articulate:migrate` applies the checked-in migration files under the configured migrations path.
+
+## Related Source Files
+
+- [MigrationsWorkflowExampleCommand](../../src/Command/Examples/MigrationsWorkflowExampleCommand.php)
+- [MySQL migrations](../../migrations/mysql)
+- [Services configuration](../../config/services.yaml)
+
+## Related Docs
+
+- [Migrations](../../documentation/migrations/README.md)
+- [Known Limitations](../../documentation/known-limitations/README.md)
+
+## Navigation
+
+Previous: [Basic CRUD](../basic-crud/README.md)  
+Base: [Examples Index](../README.md)  
+Next: [Relations](../relations/README.md)

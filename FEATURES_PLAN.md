@@ -38,7 +38,7 @@ Each feature lives in `src/Features/<Name>/` and owns its entities, commands, an
 
 **Status:** Implemented in `src/Features/CustomerAccounts/`; schema is managed by migration `Migration20260616000200CustomerAccounts`.
 
-**Implementation notes:** Current Articulate `remove()` schedules a physical delete, so the soft-delete command demonstrates logical deletion via managed `deleted_at` update while still showing `PreRemove`/`PostRemove` on a disposable physical-delete row. Lazy relation proxies also cannot be flushed safely in this release, so the address relation demo uses explicit/eager relation loading. Snake_case entity fields intentionally keep explicit `#[Property(name: ...)]` mappings until the hydrator fallback fix is available in this demo dependency.
+**Implementation notes:** Current Articulate soft-delete scheduling writes a `DateTimeImmutable` before the demo entity's string converter path runs, so the soft-delete command demonstrates logical deletion via a managed `deleted_at` update. Lazy relation proxies also cannot be flushed safely in this release, so the address relation demo uses explicit/eager relation loading. Snake_case entity fields intentionally keep explicit `#[Property(name: ...)]` mappings until the hydrator fallback fix is available in this demo dependency.
 
 **Pending library recheck:** After the not-yet-merged library fixes land in this demo dependency, re-run this module without the current workarounds and verify snake_case hydration/change tracking, lazy relation proxies, `#[SoftDeleteable] remove()` semantics, and `#[PreUpdate]` on implicit dirty flush.
 
@@ -100,12 +100,12 @@ Each feature lives in `src/Features/<Name>/` and owns its entities, commands, an
 - Update flush → **L2 cache evicted for all entity classes sharing that table+pk** — next `find(CustomerSummary::class, 1)` goes to DB and returns the fresh row
 - `persist(customer)` + `persist(summary)` on same row in one flush → `MergeUpdateConflictResolutionStrategy` groups by `table|pk`, merges SET clauses → **one UPDATE fires**
 - Same-column conflict (both explicitly modify `name`) → last `persist()` wins; no error — demonstrate by showing which value survives
-- `remove($customer)` + `flush()` → DELETE fires → **both `Customer` and `CustomerSummary` evicted from identity map and L2 cache**; subsequent `find(CustomerSummary::class, 1)` → null
-- Demonstrate reverse: `remove($summary)` + `flush()` → Customer also evicted
+- Update with an L2-backed writer `EntityManager` → **both `Customer` and `CustomerSummary` L2 entries are evicted**; a separate reader context reloads both classes from DB and sees the fresh row
+- Remove/delete sibling eviction is not currently shown because this demo entity uses soft-delete and the installed library's soft-delete scheduling needs a converter-path fix
 
 | Scenario | Identity map | L2 cache |
 |----------|-------------|----------|
-| Remove   | Evict all sibling classes (ghost-read fix) | Evict all sibling classes |
+| Remove/delete | Not currently demonstrated for `Customer` because of the soft-delete scheduling gap | Library code evicts all sibling classes |
 | Update   | No propagation (bounded-context by design) | Evict all sibling classes |
 
 ---

@@ -3,7 +3,7 @@
 namespace App\Command\Examples\MultipleUnitOfWork;
 
 use App\Entity\User;
-use App\Entity\Post;
+use App\Command\Examples\MultipleUnitOfWork\Post;
 use Articulate\Modules\EntityManager\EntityManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

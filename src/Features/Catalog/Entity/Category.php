@@ -8,6 +8,7 @@ use Articulate\Attributes\Indexes\Index;
 use Articulate\Attributes\Indexes\PrimaryKey;
 use Articulate\Attributes\Property;
 use Articulate\Attributes\Relations\ManyToMany;
+use Articulate\Attributes\Relations\MappingTable;
 use Articulate\Modules\EntityManager\Collection;
 
 #[Entity(tableName: 'categories')]
@@ -24,6 +25,10 @@ final class Category
     #[Property(maxLength: 120)]
     public string $slug;
 
-    #[ManyToMany(ownedBy: 'categories', targetEntity: Product::class)]
+    #[ManyToMany(
+        ownedBy: 'categories',
+        targetEntity: Product::class,
+        mappingTable: new MappingTable(name: 'categories_products'),
+    )]
     public array|Collection $products = [];
 }

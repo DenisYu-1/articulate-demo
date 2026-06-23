@@ -89,10 +89,11 @@ final class CustomersLifecycleCommand extends Command
 
             $toRemove = $this->entityManager->find(Customer::class, $disposable->id);
             if ($toRemove instanceof Customer) {
-                $this->entityManager->remove($toRemove);
-                $io->text('After remove(): ' . $this->callbacks($toRemove));
+                $toRemove->markDeleted();
+                $this->entityManager->persist($toRemove);
+                $io->text('After markDeleted(): ' . $this->callbacks($toRemove));
                 $this->entityManager->flush();
-                $io->text('After delete flush(): ' . $this->callbacks($toRemove));
+                $io->text('After soft-delete update flush(): ' . $this->callbacks($toRemove));
             }
 
             $this->demonstratePrePersistRollback($io, $suffix);

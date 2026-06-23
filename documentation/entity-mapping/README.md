@@ -1,10 +1,17 @@
 # Entity Mapping
 
-Define entities with PHP 8 attributes and map them to database tables.
+Map plain PHP classes to database tables with PHP 8 attributes.
 
-**Runnable example:** [Basic CRUD](../../examples/basic-crud/README.md)
-
+**Runnable example:** [Basic CRUD](../../examples/basic-crud/README.md)  
 **Related examples:** [Relations](../../examples/relations/README.md), [Migrations Workflow](../../examples/migrations-workflow/README.md)
+
+## What This Covers
+
+- `#[Entity]` table mapping
+- `#[PrimaryKey]`, `#[AutoIncrement]`, and `#[Property]`
+- Column names, nullability, max lengths, and DB types
+- Index metadata
+- Multiple entity classes mapped to the same table
 
 ## Entity Attribute
 
@@ -13,14 +20,14 @@ Define entities with PHP 8 attributes and map them to database tables.
 #[Entity(tableName: 'custom_table')]
 ```
 
-Use `#[Entity]` for default table name (pluralized class name) or `#[Entity(tableName: '...')]` for custom.
+Use `#[Entity]` for the default table name or `#[Entity(tableName: '...')]` when the physical table name should be explicit.
 
 ## Property Attributes
 
-- `#[PrimaryKey]` – primary key column
-- `#[AutoIncrement]` – auto-increment
-- `#[Property]` – basic mapping
-- `#[Property(name: 'col', type: 'string', nullable: true, maxLength: 255)]`
+- `#[PrimaryKey]` marks the primary key column.
+- `#[AutoIncrement]` delegates integer ID assignment to the database.
+- `#[Property]` maps a PHP property to a database column.
+- `#[Property(name: 'created_at', type: 'datetime', nullable: true, maxLength: 255)]` customizes the physical column metadata.
 
 ## Indexes
 
@@ -29,6 +36,36 @@ Use `#[Entity]` for default table name (pluralized class name) or `#[Entity(tabl
 #[Index(['created_at', 'status'], concurrent: false)]
 ```
 
-## Multiple Entities per Table
+Indexes are consumed by schema diffing and migration generation.
 
-You can map different entity classes to the same table (e.g. `User` vs `LoginUser` for read-only login context).
+## Same-Table Projections
+
+Different entity classes can map to the same table. The demo uses this for read models such as customer summaries and analytics snapshots where a feature only needs a subset of columns.
+
+```php
+#[Entity(tableName: 'products')]
+#[Index(['sku'], unique: true, name: 'uniq_products_sku')]
+final class Product
+{
+    #[PrimaryKey]
+    #[AutoIncrement]
+    public ?int $id = null;
+
+    #[Property(name: 'product_name', maxLength: 160)]
+    public string $name;
+}
+```
+
+Source: [Product](../../src/Features/Catalog/Entity/Product.php)
+
+## Common Pitfalls
+
+- A required PHP property should match a required database column. If `slug` is left unset in the Catalog demo, the database raises the final constraint error.
+- When the PHP property name differs from the column name, set `#[Property(name: '...')]` explicitly.
+- Same-table projections are separate entity classes. Loading `Customer` and `CustomerSummary` for the same row gives two independent PHP objects.
+
+## Navigation
+
+Previous: [Getting Started](../getting-started/README.md)  
+Base: [Documentation Index](../README.md)  
+Next: [Migrations](../migrations/README.md)

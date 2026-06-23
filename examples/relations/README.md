@@ -1,26 +1,50 @@
 # Relations
 
-Demonstrates OneToMany, ManyToOne, ManyToMany, and OneToOne relations with loading behavior.
+## What It Demonstrates
 
-**Read details:** [Relationships](../../documentation/relationships/README.md)
+Entity associations, including one-to-one, one-to-many, many-to-many, and explicit relation loading.
 
 ## Prerequisites
 
-- Docker services running
-- Migrations applied
+- Docker services running.
+- Migrations applied.
 
-## Run
+## Run Command
 
 ```bash
-bin/console app:example:relations
+./examples/relations/run.sh
 ```
 
-Or via Docker:
+Equivalent command:
 
 ```bash
 docker compose exec php bin/console app:example:relations
 ```
 
-## Expected Result
+For feature-level catalog relations, run:
 
-Creates User with Phones, Groups, and Cart. Shows relation loading and traversal.
+```bash
+docker compose exec php bin/console app:catalog:crud
+```
+
+## Expected Output
+
+The command seeds related rows and prints loaded relation data. The Catalog command also prints product/category many-to-many output.
+
+## Related Source Files
+
+- [RelationsExampleCommand](../../src/Command/Examples/RelationsExampleCommand.php)
+- [Product](../../src/Features/Catalog/Entity/Product.php)
+- [Category](../../src/Features/Catalog/Entity/Category.php)
+- [Tagging feature README](../../src/Features/Tagging/README.md)
+
+## Related Docs
+
+- [Relationships](../../documentation/relationships/README.md)
+- [Known Limitations](../../documentation/known-limitations/README.md)
+
+## Navigation
+
+Previous: [Migrations Workflow](../migrations-workflow/README.md)  
+Base: [Examples Index](../README.md)  
+Next: [Advanced Querying](../advanced-querying/README.md)

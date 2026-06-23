@@ -1,8 +1,15 @@
 # Getting Started
 
-Introduction to Articulate ORM and project setup.
+Install Articulate, configure database access, and wire the two services used by the rest of the examples.
 
 **Runnable example:** [Basic CRUD](../../examples/basic-crud/README.md)
+
+## What This Covers
+
+- Installing the package with Composer
+- Defining database connection settings
+- Registering `Connection` and `EntityManager`
+- Running the first demo command
 
 ## Installation
 
@@ -12,9 +19,11 @@ Add the package via Composer:
 composer require denisyu-1/articulate
 ```
 
+The demo repository already has this dependency in `composer.json`.
+
 ## Configuration
 
-Configure the database connection in your environment:
+Configure database access through environment variables:
 
 ```env
 DATABASE_DSN=mysql:host=mysql;dbname=articulate_test;charset=utf8mb4
@@ -22,14 +31,28 @@ DATABASE_USER=user
 DATABASE_PASSWORD=userpassword
 ```
 
+The demo also uses `ARTICULATE_MIGRATIONS_PATH` so migration commands know whether to read/write MySQL or PostgreSQL migrations.
+
 ## Services
 
-Register `Connection` and `EntityManager` in your DI container. The demo project uses Symfony's `services.yaml`:
+Register the core Articulate services in the container:
 
-- `Articulate\Connection` – DSN, user, password
-- `Articulate\Modules\EntityManager\EntityManager` – depends on Connection
+- `Articulate\Connection` receives the DSN, username, and password.
+- `Articulate\Modules\EntityManager\EntityManager` receives the `Connection`.
 
-## Next Steps
+Most examples use `EntityManager` directly to persist, find, query, remove, and flush entities.
 
-- [Entity Mapping](../entity-mapping/README.md) – Define entities and properties
-- [Relationships](../relationships/README.md) – Define relations between entities
+## First Run
+
+```bash
+docker compose up -d
+docker compose exec php bin/console articulate:init
+docker compose exec php bin/console articulate:migrate
+docker compose exec php bin/console app:catalog:crud
+```
+
+## Navigation
+
+Previous: [Repository README](../../README.md)  
+Base: [Documentation Index](../README.md)  
+Next: [Entity Mapping](../entity-mapping/README.md)

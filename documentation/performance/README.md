@@ -1,12 +1,23 @@
 # Performance
 
-Identity map, result cache, query logging, partial hydration, batch iteration.
+Understand the runtime behavior that matters once examples move beyond small CRUD flows.
 
-**Related examples:** [Advanced Querying](../../examples/advanced-querying/README.md)
+**Related example:** [Advanced Querying](../../examples/advanced-querying/README.md)
+
+## What This Covers
+
+- Identity map behavior
+- Result cache
+- Second-level cache
+- Query logging
+- Partial and scalar hydration
+- Batch iteration
 
 ## Identity Map
 
-EntityManager reuses loaded entities by ID. Same entity loaded twice returns the same instance.
+`EntityManager` keeps an in-memory identity map. Loading the same entity class and primary key twice returns the same PHP object instance until the manager is cleared.
+
+This avoids duplicate objects for the same row, but it also means long-running imports should clear the manager periodically.
 
 ## Result Cache
 
@@ -14,27 +25,53 @@ EntityManager reuses loaded entities by ID. Same entity loaded twice returns the
 $qb->enableResultCache($lifetime, $cacheId);
 ```
 
-Locked queries are never cached.
+Result cache stores query results. Locked queries are not cached.
+
+## Second-Level Cache
+
+```php
+$em = new EntityManager($connection, secondLevelCache: $pool);
+```
+
+Second-level cache stores raw entity row data for `find()` lookups by entity class and primary key. It survives `EntityManager::clear()`, unlike the identity map.
+
+When a flush updates, deletes, or soft-deletes an entity, Articulate evicts cache entries for every mapped entity class that shares the same table and primary key. This keeps same-row projections consistent after writes.
+
+Second-level cache does not serve list/query paths such as `findBy()`, query-builder `getResult()`, or chunked batch reads.
 
 ## Query Logging
 
-Implement `QueryLoggerInterface` for profiling (e.g. `FileQueryLogger`, `PsrQueryLogger`).
+Implement `QueryLoggerInterface` to profile query count, SQL text, and cache effects. The analytics demo uses query logging to show result-cache hit and miss behavior.
 
 ## Partial Hydration
 
-Use `PartialHydrator` or `ScalarHydrator` for partial selects when full entity hydration is not needed.
+Use `PartialHydrator` or `ScalarHydrator` when full entity hydration is unnecessary. This is useful for reporting paths, aggregate output, and read-only projections.
 
-## Batch / Chunk Iteration
+## Batch Iteration
 
-`getResult()` loads all rows at once via `fetchAll()`. For large datasets use `chunk()` to process records in fixed-size batches, executing one query per batch:
+Avoid loading very large datasets with a single `getResult()` call. Process rows in bounded batches and call `$entityManager->clear()` between batches when the identity map would otherwise grow too large.
 
 ```php
-foreach ($em->createQueryBuilder(Order::class)->orderBy('id')->chunk(500) as $batch) {
-    foreach ($batch as $order) {
-        $processor->handle($order);
-    }
-    $em->clear(); // release the batch from the identity map
-}
+$batch = $entityManager
+    ->createQueryBuilder(OrderSnapshot::class)
+    ->orderBy('placed_at', 'ASC')
+    ->limit($chunkSize)
+    ->offset($offset)
+    ->getResult();
+
+$entityManager->clear();
 ```
 
-Each chunk is a plain array of up to `$size` hydrated entities. The builder's original `limit` and `offset` are restored after iteration.
+Source: [AnalyticsBatchCommand](../../src/Features/Analytics/Command/AnalyticsBatchCommand.php)
+
+## Common Pitfalls
+
+- Second-level cache helps `find()` by primary key, not list queries.
+- Result cache can return stale aggregate rows until its TTL expires.
+- Current scalar and partial hydration caveats are tracked in [Known Limitations](../known-limitations/README.md).
+
+## Navigation
+
+Previous: [Transactions and Locking](../transactions-locking/README.md)  
+Base: [Documentation Index](../README.md)  
+Next: [Known Limitations](../known-limitations/README.md)

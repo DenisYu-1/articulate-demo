@@ -1,50 +1,76 @@
 # Query Builder
 
-Build queries with filters, joins, aggregates, subqueries, and Criteria.
+Build database queries with filters, joins, aggregates, subqueries, and reusable Criteria.
 
-**Runnable example:** [Advanced Querying](../../examples/advanced-querying/README.md)
+**Runnable example:** [Advanced Querying](../../examples/advanced-querying/README.md)  
+**Related guide:** [Pagination and Filtering](../pagination-filtering/README.md)
 
-**Related examples:** [Pagination and Filtering](../pagination-filtering/README.md)
+## What This Covers
+
+- Fluent query construction
+- Where clauses and raw predicates
+- Joins and aggregate functions
+- Subqueries
+- Reusable Criteria objects
+- Chunk-style batch reads when available
 
 ## Basic Usage
 
 ```php
 $qb = $entityManager->createQueryBuilder(User::class);
-$qb->select('*')->from('users')->where('status', 'active')->limit(10);
-$results = $qb->getResult();
+
+$users = $qb
+    ->select('*')
+    ->where('status', 'active')
+    ->orderBy('created_at', 'DESC')
+    ->limit(10)
+    ->getResult();
 ```
 
 ## Where Clauses
 
-- `where($field, $value)` – equality
-- `whereIn($field, $values)` – IN
-- `whereNull($field)` / `whereNotNull($field)`
-- `whereExists($callback)` – subquery
-- `whereRaw($sql, ...$params)`
+- `where($field, $value)` for equality.
+- `whereIn($field, $values)` for `IN (...)`.
+- `whereNull($field)` and `whereNotNull($field)` for null checks.
+- `whereExists($callback)` for subqueries.
+- `whereRaw($sql, ...$params)` for escape-hatch SQL with bound parameters.
 
-## Joins
+## Joins and Aggregates
 
-- `join($table, $alias, $condition)` – INNER
-- `leftJoin`, `rightJoin`, `crossJoin`
+Use `join`, `leftJoin`, `rightJoin`, and `crossJoin` for table joins.
 
-## Aggregates
-
-- `count($field, $alias)`, `sum`, `avg`, `max`, `min`
+Use `count`, `sum`, `avg`, `max`, and `min` for aggregate selects.
 
 ## Criteria
 
-Implement `CriteriaInterface` and apply via `apply($qb)` for reusable filters.
-
-## Chunk Iteration
-
-Process large result sets in batches without loading everything into memory:
+Implement `CriteriaInterface` when a filter should be reusable across repositories or commands, then apply it to a builder.
 
 ```php
-foreach ($qb->orderBy('id')->chunk(500) as $batch) {
-    foreach ($batch as $entity) {
-        // process one entity at a time
-    }
-}
+$orders = $this->entityManager
+    ->createQueryBuilder(Order::class)
+    ->whereNull('shipped_at')
+    ->orderBy('placed_at', 'DESC')
+    ->getResult();
 ```
 
-See [Performance](../performance/README.md) for memory management tips.
+Use `whereRaw()` only with bound parameters:
+
+```php
+$qb->whereRaw('total > ?', [100]);
+```
+
+## Batch Reads
+
+For large result sets, prefer bounded batches and clear the `EntityManager` between batches so the identity map does not grow without limit. See [Performance](../performance/README.md) for memory behavior.
+
+## Common Pitfalls
+
+- Use `whereNull()` for SQL null checks. `where('column', null)` is a current limitation listed in [Known Limitations](../known-limitations/README.md).
+- Empty `whereIn()` input should be treated intentionally. The Orders demo prints the generated SQL and empty-result behavior.
+- Avoid concatenating user input into `whereRaw()`.
+
+## Navigation
+
+Previous: [Relationships](../relationships/README.md)  
+Base: [Documentation Index](../README.md)  
+Next: [Pagination and Filtering](../pagination-filtering/README.md)

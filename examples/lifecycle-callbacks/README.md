@@ -1,26 +1,49 @@
 # Lifecycle Callbacks
 
-Demonstrates PrePersist, PostPersist, PreUpdate, PostUpdate, PreRemove, PostRemove, PostLoad.
+## What It Demonstrates
 
-**Read details:** [Lifecycle Callbacks](../../documentation/lifecycle-callbacks/README.md)
+Persistence, update, removal, and hydration callbacks around entity state changes.
 
 ## Prerequisites
 
-- Docker services running
-- Migrations applied
+- Docker services running.
+- Migrations applied.
 
-## Run
+## Run Command
 
 ```bash
-bin/console app:example:lifecycle-callbacks
+./examples/lifecycle-callbacks/run.sh
 ```
 
-Or via Docker:
+Equivalent command:
 
 ```bash
 docker compose exec php bin/console app:example:lifecycle-callbacks
 ```
 
-## Expected Result
+Feature-level command:
 
-Shows callback execution order during persist, update, and remove.
+```bash
+docker compose exec php bin/console app:customers:lifecycle
+```
+
+## Expected Output
+
+The command prints callback names in the order they fire. The customer command also shows audit-writing and `PostLoad` behavior.
+
+## Related Source Files
+
+- [LifecycleCallbacksExampleCommand](../../src/Command/Examples/LifecycleCallbacksExampleCommand.php)
+- [CustomersLifecycleCommand](../../src/Features/CustomerAccounts/Command/CustomersLifecycleCommand.php)
+- [Customer](../../src/Features/CustomerAccounts/Entity/Customer.php)
+
+## Related Docs
+
+- [Lifecycle Callbacks](../../documentation/lifecycle-callbacks/README.md)
+- [Customer Accounts feature README](../../src/Features/CustomerAccounts/README.md)
+
+## Navigation
+
+Previous: [Pagination, Sorting, Soft Delete](../pagination-sorting-soft-delete/README.md)  
+Base: [Examples Index](../README.md)  
+Next: [Custom Types](../custom-types/README.md)

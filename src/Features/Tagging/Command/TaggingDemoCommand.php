@@ -124,8 +124,8 @@ final class TaggingDemoCommand extends Command
     private function insertTaggable(int $tagId, string $type, string $id): void
     {
         $this->entityManager->getConnection()->executeQuery(
-            'INSERT INTO taggables (tag_id, taggable_type, taggable_id) VALUES (?, ?, ?)',
-            [$tagId, $type, $id],
+            'INSERT INTO taggables (id, tag_id, taggable_type, taggable_id) VALUES (?, ?, ?, ?)',
+            [random_int(1, 2147483647), $tagId, $type, $id],
         );
     }
 
