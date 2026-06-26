@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9247769422195f03623a4680c6df9725",
+    "content-hash": "bd0e55ba4b08675b758ab08a13bd3254",
     "packages": [
         {
             "name": "denisyu-1/articulate",
-            "version": "dev-improvements",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DenisYu-1/articulate.git",
-                "reference": "c2cc93eff9b0effebbbf581b376166cd73e8ac8c"
+                "reference": "434988b8096c8e6e8aba390e50063fb1a049721b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/c2cc93eff9b0effebbbf581b376166cd73e8ac8c",
-                "reference": "c2cc93eff9b0effebbbf581b376166cd73e8ac8c",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/434988b8096c8e6e8aba390e50063fb1a049721b",
+                "reference": "434988b8096c8e6e8aba390e50063fb1a049721b",
                 "shasum": ""
             },
             "require": {
@@ -37,6 +37,7 @@
                 "squizlabs/php_codesniffer": "^3.10",
                 "vlucas/phpdotenv": "^5.6"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -65,9 +66,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DenisYu-1/articulate/issues",
-                "source": "https://github.com/DenisYu-1/articulate/tree/improvements"
+                "source": "https://github.com/DenisYu-1/articulate/tree/main"
             },
-            "time": "2026-06-24T13:55:11+00:00"
+            "time": "2026-06-26T08:00:08+00:00"
         },
         {
             "name": "psr/cache",

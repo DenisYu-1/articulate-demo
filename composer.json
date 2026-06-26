@@ -1,5 +1,6 @@
 {
-    "name": "denis/articulate-demo",
+    "name": "denisyu-1/articulate-demo",
+    "description": "Runnable demo and documentation companion for the Articulate ORM",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -9,7 +10,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo": "*",
-        "denisyu-1/articulate": "dev-improvements",
+        "denisyu-1/articulate": "dev-main",
         "symfony/console": "8.*",
         "symfony/dotenv": "8.*",
         "symfony/flex": "^2",
