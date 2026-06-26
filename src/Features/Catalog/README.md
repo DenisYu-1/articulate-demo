@@ -6,7 +6,7 @@ Catalog is the product and category model used by the rest of the demo. It keeps
 
 ## Entities
 
-- `Product` maps `products` with primary key, custom column names, nullable and required fields, unique and composite indexes, and a many-to-many category relation.
+- `Product` maps `products` with primary key, custom column names, nullable and required fields, concurrent unique and composite indexes, and a many-to-many category relation.
 - `Category` maps `categories` and owns the inverse product collection through `categories_products`.
 - `InventorySlot` maps `product_stock` for inventory quantities used by the Orders feature.
 - `ProductStatus` is a PHP enum converted to the database string stored in `Product::$status`.
@@ -25,8 +25,8 @@ Catalog is the product and category model used by the rest of the demo. It keeps
 
 ```php
 #[Entity(tableName: 'products')]
-#[Index(['sku'], unique: true, name: 'uniq_products_sku')]
-#[Index(['categoryId', 'status'], name: 'idx_products_category_status')]
+#[Index(['sku'], unique: true, name: 'uniq_products_sku', concurrent: true)]
+#[Index(['categoryId', 'status'], name: 'idx_products_category_status', concurrent: true)]
 final class Product
 {
     #[PrimaryKey]
@@ -38,13 +38,13 @@ final class Product
 }
 ```
 
-## Related Docs and Examples
+The PostgreSQL Catalog migration disables transactional execution because PostgreSQL requires `CREATE INDEX CONCURRENTLY` to run outside a transaction.
+
+## Related Docs
 
 - [Entity Mapping](../../../documentation/entity-mapping/README.md)
 - [Custom Types](../../../documentation/custom-types/README.md)
 - [Relationships](../../../documentation/relationships/README.md)
-- [Basic CRUD](../../../examples/basic-crud/README.md)
-- [Advanced Querying](../../../examples/advanced-querying/README.md)
 
 ## Known Caveats
 

@@ -2,8 +2,7 @@
 
 Define associations between mapped entities, from simple ownership to polymorphic links.
 
-**Runnable example:** [Relations](../../examples/relations/README.md)  
-**Related example:** [Basic CRUD](../../examples/basic-crud/README.md)
+**Runnable feature commands:** `app:catalog:crud`, `app:orders:query`, `app:tagging:demo`
 
 ## What This Covers
 

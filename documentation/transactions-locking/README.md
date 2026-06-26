@@ -2,7 +2,7 @@
 
 Use transactions and row-level locks when writes must be consistent across multiple queries.
 
-**Runnable example:** [Transactions and Locking](../../examples/transactions-locking/README.md)
+**Runnable feature commands:** `app:orders:place`, `app:orders:deadlock`
 
 ## What This Covers
 

@@ -39,13 +39,11 @@ class Customer
 }
 ```
 
-## Related Docs and Examples
+## Related Docs
 
 - [Lifecycle Callbacks](../../../documentation/lifecycle-callbacks/README.md)
 - [Pagination and Filtering](../../../documentation/pagination-filtering/README.md)
 - [Performance](../../../documentation/performance/README.md)
-- [Pagination, Sorting, Soft Delete](../../../examples/pagination-sorting-soft-delete/README.md)
-- [Lifecycle Callbacks](../../../examples/lifecycle-callbacks/README.md)
 
 ## Known Caveats
 

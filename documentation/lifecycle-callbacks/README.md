@@ -2,7 +2,7 @@
 
 Run entity methods around persistence, update, removal, and hydration events.
 
-**Runnable example:** [Lifecycle Callbacks](../../examples/lifecycle-callbacks/README.md)
+**Runnable feature command:** `app:customers:lifecycle`
 
 ## What This Covers
 

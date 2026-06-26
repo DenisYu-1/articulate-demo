@@ -2,7 +2,7 @@
 
 Generate and apply schema changes from Articulate entity metadata.
 
-**Runnable example:** [Migrations Workflow](../../examples/migrations-workflow/README.md)
+**Runnable commands:** `articulate:init`, `articulate:migrate`, `articulate:diff`
 
 ## What This Covers
 
@@ -21,7 +21,7 @@ Generate and apply schema changes from Articulate entity metadata.
 
 ```yaml
 parameters:
-    articulate_entities_path: 'src/Entity'
+    articulate_entities_path: 'src'
     articulate_migrations_path: '%env(resolve:ARTICULATE_MIGRATIONS_PATH)%'
     articulate_migrations_namespace: 'App\Migrations'
 ```
@@ -38,10 +38,22 @@ The demo ships with migrations under `migrations/mysql`, so `articulate:diff` is
 
 From a clean database, the first diff can generate migrations for all mapped entity tables. Later diffs should only contain the delta.
 
+## Transactional Migrations
+
+Migrations run inside a transaction by default. Override `isTransactional()` when a migration contains database operations that must run outside a transaction, such as PostgreSQL `CREATE INDEX CONCURRENTLY`.
+
+```php
+protected function isTransactional(): bool
+{
+    return false;
+}
+```
+
 ## Common Pitfalls
 
 - Confirm `ARTICULATE_MIGRATIONS_PATH` points at the driver you are using before running diff or migrate.
 - Do not commit generated diffs without reviewing them against the intended entity change.
+- PostgreSQL concurrent index creation requires a non-transactional migration.
 - Polymorphic pivot schemas currently have comparison caveats; see [Known Limitations](../known-limitations/README.md).
 
 ## Navigation

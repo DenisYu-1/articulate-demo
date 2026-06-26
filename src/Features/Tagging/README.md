@@ -31,11 +31,10 @@ final class Tag
 }
 ```
 
-## Related Docs and Examples
+## Related Docs
 
 - [Relationships](../../../documentation/relationships/README.md)
 - [Known Limitations](../../../documentation/known-limitations/README.md)
-- [Relations](../../../examples/relations/README.md)
 
 ## Known Caveats
 

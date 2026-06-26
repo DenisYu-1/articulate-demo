@@ -24,10 +24,9 @@ Bulk Import simulates loading a large product catalog. It contrasts a naive sing
 bin/console app:import:run --count=100 --batch-size=20
 ```
 
-## Related Docs and Examples
+## Related Docs
 
 - [Performance](../../../documentation/performance/README.md)
-- [Multiple Unit of Work](../../../examples/multiple-unit-of-work/README.md)
 - [Known Limitations](../../../documentation/known-limitations/README.md)
 
 ## Known Caveats

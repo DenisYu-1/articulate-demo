@@ -1,5 +1,0 @@
-controllers:
-    resource:
-        path: ../src/Command/
-        namespace: App\Command\Examples
-    type: attribute

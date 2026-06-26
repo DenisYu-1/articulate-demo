@@ -182,12 +182,12 @@ Each feature lives in `src/Features/<Name>/` and owns its entities, commands, an
 
 ## Feature: Analytics
 
-**Status:** Implemented in `src/Features/Analytics/`; no schema migration is required because the feature uses read-only projections over the existing `orders`, `order_items`, and `products` tables.
+**Status:** Implemented in `src/Features/Analytics/`; includes an additive migration that extends existing `orders`, `order_items`, and `products` tables with Analytics-owned reporting columns.
 
 **Implementation notes:** `OrderItemSnapshot` includes the physical `id` primary key even though reports group by physical `order_id`/`product_id` columns; projection entities still need primary-key metadata for clean hydration, identity map registration, `find()`, and L2 cache behavior. It intentionally does not map `order_id` as a scalar property because `OrderItem::$order` owns that FK column in the write model. `app:analytics:report` creates local instrumented `EntityManager` instances so it can demonstrate result-cache hits and L2 cache scope without changing the app-wide `Connection` service. `app:analytics:batch` uses a limit/offset fallback because the installed Articulate dependency documents and examples `QueryBuilder::chunk()`, but this version does not expose that method.
 
 **Pending library recheck / fixes:**
-- `QueryBuilder::chunk()` is documented and used by `app:example:advanced-querying`, but is missing from the installed library class.
+- `QueryBuilder::chunk()` is documented by the library, but is missing from the installed library class; `app:analytics:batch` uses a limit/offset fallback.
 - Normal aggregate/specific-column `QueryBuilder` selects force raw array hydration before custom hydrators can run, so `ScalarHydrator` and `PartialHydrator` are only demonstrable through raw SQL workarounds.
 - `ScalarHydrator` returns scalar values, but `QueryResultExecutor` still calls `UnitOfWork::registerManaged()` when a UnitOfWork is attached, causing a type error (`int given`) instead of returning scalar rows cleanly.
 - `PartialHydrator::hydrate()` delegates to `ObjectHydrator::hydrate($class, [])`, which registers a transient empty-id entity before partial fields are applied; this should be rechecked before recommending it for production partial reads.
@@ -196,9 +196,9 @@ Each feature lives in `src/Features/<Name>/` and owns its entities, commands, an
 **Domain:** Reporting over orders and products. Uses read-side projection entities — lighter classes mapping the same tables with only the columns needed for reporting.
 
 **Entities:**
-- `OrderSnapshot` — maps `orders` table; fields: `id`, `status`, `placed_at`. Read-only projection; no relations.
-- `OrderItemSnapshot` — maps `order_items` table; fields: `id`, `product_id`, `quantity`, `unit_price`; queries can still filter on the physical `order_id` column without mapping it as a scalar property.
-- `ProductSnapshot` — maps `products` table; fields: `id`, `name`, `category_id`. For joining in reports.
+- `OrderSnapshot` — maps `orders` table; fields: `id`, `status`, `placed_at`, `analytics_channel`. Read-only projection; no relations.
+- `OrderItemSnapshot` — maps `order_items` table; fields: `id`, `product_id`, `quantity`, `unit_price`, `margin_amount`; queries can still filter on the physical `order_id` column without mapping it as a scalar property.
+- `ProductSnapshot` — maps `products` table; fields: `id`, `name`, `category_id`, `analytics_family`. For joining in reports.
 
 **Commands:**
 - `app:analytics:report` — revenue by category, top products, order counts per status; result cache on expensive aggregates; run twice to show cache hit vs query log difference
@@ -289,7 +289,7 @@ Each feature lives in `src/Features/<Name>/` and owns its entities, commands, an
 Separate from feature commands — demonstrated via the `articulate:*` CLI directly:
 
 - **Adding NOT NULL column to table with existing rows** — `articulate:diff` generates the migration correctly, but applying it fails if the table has data and no default is specified; fix: add a default in the migration SQL before dropping it to NOT NULL (two-step migration)
-- **`articulate:validate`** — already covered by `app:example:incomplete-entity`
+- **`articulate:validate`** — use directly for incomplete entity metadata checks
 
 ## PostgreSQL
 

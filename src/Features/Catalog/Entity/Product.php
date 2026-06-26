@@ -14,8 +14,8 @@ use Articulate\Attributes\Relations\MappingTableProperty;
 use Articulate\Modules\EntityManager\Collection;
 
 #[Entity(tableName: 'products')]
-#[Index(['sku'], unique: true, name: 'uniq_products_sku')]
-#[Index(['categoryId', 'status'], name: 'idx_products_category_status')]
+#[Index(['sku'], unique: true, name: 'uniq_products_sku', concurrent: true)]
+#[Index(['categoryId', 'status'], name: 'idx_products_category_status', concurrent: true)]
 final class Product
 {
     #[PrimaryKey]
@@ -37,7 +37,7 @@ final class Product
     #[Property(maxLength: 32)]
     public string $status;
 
-    #[Property(name: 'category_id', nullable: true)]
+    #[Property(nullable: true)]
     public ?int $categoryId = null;
 
     #[Property]
@@ -51,7 +51,8 @@ final class Product
             properties: [
                 new MappingTableProperty('is_primary', 'int', defaultValue: '0'),
                 new MappingTableProperty('position', 'int', defaultValue: '0'),
-                new MappingTableProperty('assigned_at', 'datetime', nullable: true),
+                new MappingTableProperty('assigned_at', 'datetime', createdAt: true),
+                new MappingTableProperty('updated_at', 'datetime', updatedAt: true),
             ],
         ),
     )]

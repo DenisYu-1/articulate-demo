@@ -83,6 +83,8 @@ trait AnalyticsCommandSupport
 
         $this->entityManager->flush();
 
+        $this->populateAnalyticsColumns($orderIds, $products);
+
         $firstItemId = $this->firstOrderItemId($orderIds[0]);
         if ($firstItemId === null) {
             throw new \RuntimeException('Analytics seed did not create order items.');
@@ -137,6 +139,34 @@ trait AnalyticsCommandSupport
         $item->unitPrice = $product->price;
 
         return $item;
+    }
+
+    /**
+     * @param string[] $orderIds
+     * @param Product[] $products
+     */
+    private function populateAnalyticsColumns(array $orderIds, array $products): void
+    {
+        foreach ($orderIds as $index => $orderId) {
+            $this->entityManager->getConnection()->executeQuery(
+                'UPDATE orders SET analytics_channel = ? WHERE id = ?',
+                [$index % 2 === 0 ? 'direct' : 'partner', $orderId],
+            );
+        }
+
+        foreach ($products as $index => $product) {
+            $this->entityManager->getConnection()->executeQuery(
+                'UPDATE products SET analytics_family = ? WHERE id = ?',
+                [$index === 2 ? 'Accessories' : 'Camera Systems', $product->id],
+            );
+        }
+
+        foreach ($orderIds as $orderId) {
+            $this->entityManager->getConnection()->executeQuery(
+                'UPDATE order_items SET margin_amount = quantity * unit_price * ? WHERE order_id = ?',
+                [0.35, $orderId],
+            );
+        }
     }
 
     private function firstOrderItemId(string $orderId): ?int

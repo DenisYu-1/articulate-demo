@@ -2,7 +2,7 @@
 
 Install Articulate, configure database access, and wire the two services used by the rest of the examples.
 
-**Runnable example:** [Basic CRUD](../../examples/basic-crud/README.md)
+**Runnable feature command:** `app:catalog:crud`
 
 ## What This Covers
 

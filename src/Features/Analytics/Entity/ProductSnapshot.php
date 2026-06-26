@@ -19,4 +19,7 @@ final class ProductSnapshot
 
     #[Property(name: 'category_id', nullable: true)]
     public ?int $categoryId = null;
+
+    #[Property(name: 'analytics_family', maxLength: 80, nullable: true)]
+    public ?string $analyticsFamily = null;
 }

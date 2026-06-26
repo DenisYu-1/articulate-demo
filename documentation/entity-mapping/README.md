@@ -2,8 +2,8 @@
 
 Map plain PHP classes to database tables with PHP 8 attributes.
 
-**Runnable example:** [Basic CRUD](../../examples/basic-crud/README.md)  
-**Related examples:** [Relations](../../examples/relations/README.md), [Migrations Workflow](../../examples/migrations-workflow/README.md)
+**Runnable feature commands:** `app:catalog:crud`, `app:customers:cross-entity`  
+**Related feature commands:** `app:tagging:demo`, `articulate:diff`
 
 ## What This Covers
 
@@ -36,7 +36,7 @@ Use `#[Entity]` for the default table name or `#[Entity(tableName: '...')]` when
 #[Index(['created_at', 'status'], concurrent: false)]
 ```
 
-Indexes are consumed by schema diffing and migration generation.
+Indexes are consumed by schema diffing and migration generation. PostgreSQL `CREATE INDEX CONCURRENTLY` cannot run inside a transaction, so migrations that create concurrent indexes must disable transactional execution.
 
 ## Same-Table Projections
 

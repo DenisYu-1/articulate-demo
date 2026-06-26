@@ -18,4 +18,7 @@ final class OrderSnapshot
 
     #[Property(name: 'placed_at')]
     public string $placedAt;
+
+    #[Property(name: 'analytics_channel', nullable: true, maxLength: 40)]
+    public ?string $analyticsChannel = null;
 }

@@ -22,4 +22,7 @@ final class OrderItemSnapshot
 
     #[Property(name: 'unit_price')]
     public float $unitPrice;
+
+    #[Property(name: 'margin_amount', nullable: true)]
+    public ?float $marginAmount = null;
 }

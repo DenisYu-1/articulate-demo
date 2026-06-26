@@ -2,7 +2,7 @@
 
 Convert between PHP-specific values and database storage values.
 
-**Runnable example:** [Custom Types](../../examples/custom-types/README.md)
+**Runnable feature command:** `app:catalog:crud`
 
 ## What This Covers
 

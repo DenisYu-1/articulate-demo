@@ -37,13 +37,11 @@ final class Order
 }
 ```
 
-## Related Docs and Examples
+## Related Docs
 
 - [Transactions and Locking](../../../documentation/transactions-locking/README.md)
 - [Query Builder](../../../documentation/query-builder/README.md)
 - [Relationships](../../../documentation/relationships/README.md)
-- [Transactions and Locking](../../../examples/transactions-locking/README.md)
-- [Advanced Querying](../../../examples/advanced-querying/README.md)
 
 ## Known Caveats
 

@@ -26,14 +26,14 @@ docker compose exec php bin/console articulate:init    # create migrations table
 docker compose exec php bin/console articulate:diff    # generate migration from entity diff
 docker compose exec php bin/console articulate:migrate # run pending migrations
 
-# Run example commands (require running DB)
-docker compose exec php bin/console app:example:basic-crud
-docker compose exec php bin/console app:example:relations
-docker compose exec php bin/console app:example:advanced-querying
-docker compose exec php bin/console app:example:transactions-locking
-docker compose exec php bin/console app:example:pagination-sorting-soft-delete
-docker compose exec php bin/console app:example:lifecycle-callbacks
-docker compose exec php bin/console app:example:custom-types
+# Run feature demo commands (require running DB)
+docker compose exec php bin/console app:catalog:crud
+docker compose exec php bin/console app:catalog:query
+docker compose exec php bin/console app:customers:browse
+docker compose exec php bin/console app:orders:place
+docker compose exec php bin/console app:tagging:demo
+docker compose exec php bin/console app:analytics:report
+docker compose exec php bin/console app:import:run --count=40 --batch-size=10
 ```
 
 ## Architecture
@@ -49,7 +49,7 @@ Core services wired in `config/services.yaml`:
 
 ### Entity Mapping
 
-Entities live in `src/Entity/`. Mapping uses PHP 8 attributes:
+Entities live under `src/Features/*/Entity/`. Mapping uses PHP 8 attributes:
 - `#[Entity(tableName: '...')]` — marks class as ORM entity
 - `#[PrimaryKey]` + `#[AutoIncrement]` — PK definition
 - `#[Property(...)]` — column mapping (supports `name`, `maxLength`)
@@ -57,15 +57,15 @@ Entities live in `src/Entity/`. Mapping uses PHP 8 attributes:
 - Relations: `#[OneToMany]`, `#[ManyToOne]`, `#[OneToOne]`, `#[ManyToMany]`
 - Relation collections typed as `array|Collection`
 
-Entities are plain PHP classes (no base class). Entity path configured as `src/Entity` in `services.yaml`.
+Entities are plain PHP classes (no base class). Entity scanning is configured with `articulate_entities_path: 'src'` in `services.yaml`.
 
-### Example Commands
+### Feature Commands
 
-All in `src/Command/Examples/`. Each is a Symfony console command (`#[AsCommand]`) that injects `EntityManager` directly and demonstrates one ORM feature. Commands are self-contained — they create, use, and clean up their own data.
+Feature demos live in `src/Features/*/Command/`. Each is a Symfony console command (`#[AsCommand]`) that demonstrates one ORM feature in a small domain context. Commands are self-contained — they create, use, and clean up their own data.
 
 ### Migration Workflow
 
-1. Add/modify entities in `src/Entity/`
+1. Add/modify entities in `src/Features/*/Entity/`
 2. `articulate:diff` — reads entity attributes + live DB schema, writes PHP migration class to `migrations/`
 3. `articulate:migrate` — executes pending migrations in order
 

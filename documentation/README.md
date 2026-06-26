@@ -1,6 +1,6 @@
 # Documentation
 
-These guides are ordered as a tutorial path. Each page has a short description, related runnable example, and previous/base/next navigation.
+These guides are ordered as a tutorial path. Each page has a short description, related runnable feature commands, and previous/base/next navigation.
 
 | Step | Guide | Description |
 |------|-------|-------------|
@@ -19,7 +19,6 @@ These guides are ordered as a tutorial path. Each page has a short description, 
 ## Related
 
 - [Repository README](../README.md)
-- [Command matrix](../examples/README.md#command-matrix)
 - [Glossary](../GLOSSARY.md)
 - [Known limitations](known-limitations/README.md)
 - [Feature implementation notes](../FEATURES_PLAN.md)

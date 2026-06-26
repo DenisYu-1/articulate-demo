@@ -2,7 +2,7 @@
 
 Understand the runtime behavior that matters once examples move beyond small CRUD flows.
 
-**Related example:** [Advanced Querying](../../examples/advanced-querying/README.md)
+**Runnable feature commands:** `app:analytics:report`, `app:analytics:batch`, `app:import:run`
 
 ## What This Covers
 

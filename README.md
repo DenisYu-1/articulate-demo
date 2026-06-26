@@ -1,37 +1,35 @@
 # Articulate ORM Demo
 
-This repository is the runnable demo, examples suite, and documentation companion for [Articulate](https://github.com/denisyu-1/articulate), a lightweight PHP ORM built around PHP 8 attributes, an identity map, Unit of Work change tracking, relation mapping, migrations, and query-building utilities.
+This repository is the runnable demo and documentation companion for [Articulate](https://github.com/denisyu-1/articulate), a lightweight PHP ORM built around PHP 8 attributes, an identity map, Unit of Work change tracking, relation mapping, migrations, and query-building utilities.
 
 Use this project when you want to see Articulate features in context. Each guide explains the concept, points to runnable console commands, and links to the previous and next topic so the repository can be read as a tutorial.
 
 ## What This Repository Contains
 
-| Area | Purpose |
-|------|---------|
-| [`documentation/`](documentation/README.md) | Concept guides ordered from basic setup to advanced runtime behavior. |
-| [`examples/`](examples/README.md) | Runnable examples with prerequisites, commands, and expected results. |
-| [`src/Features/`](src/Features) | Demo feature modules for catalog, customers, orders, tagging, analytics, and imports. |
-| [`migrations/`](migrations) | MySQL/PostgreSQL schema migrations used by the examples. |
-| [`FEATURES_PLAN.md`](FEATURES_PLAN.md) | Detailed implementation notes, edge cases, and known library rechecks for the demo modules. |
-| [`GLOSSARY.md`](GLOSSARY.md) | Short definitions with links to the guide where each term is explained. |
-| [`documentation/known-limitations/`](documentation/known-limitations/README.md) | Structured list of current library gaps and demo workarounds. |
+| Area | Purpose                                                                                                   |
+|------|-----------------------------------------------------------------------------------------------------------|
+| [`documentation/`](documentation/README.md) | Concept guides ordered from basic setup to advanced runtime behavior.                                     |
+| [`src/Features/`](src/Features) | Demo feature modules for catalog, customers, orders, tagging, analytics, and imports.                     |
+| [`migrations/`](migrations) | MySQL/PostgreSQL schema migrations used by the examples. For demo-purposes both versions being generated. |
+| [`GLOSSARY.md`](GLOSSARY.md) | Short definitions with links to the guide where each term is explained.                                   |
+| [`documentation/known-limitations/`](documentation/known-limitations/README.md) | Structured list of current library gaps and demo workarounds.                                             |
 
 ## Learning Path
 
 Start at the top and move down. The order intentionally goes from the smallest working setup to cross-cutting and performance-oriented features.
 
-| Step | Guide | What You Learn | Runnable Example |
+| Step | Guide | What You Learn | Runnable Feature Command |
 |------|-------|----------------|------------------|
-| 1 | [Getting Started](documentation/getting-started/README.md) | Install Articulate, configure database access, and wire `Connection` plus `EntityManager`. | [Basic CRUD](examples/basic-crud/README.md) |
-| 2 | [Entity Mapping](documentation/entity-mapping/README.md) | Map PHP classes, properties, primary keys, indexes, and same-table projections. | [Basic CRUD](examples/basic-crud/README.md) |
-| 3 | [Migrations](documentation/migrations/README.md) | Generate and apply schema changes from entity metadata. | [Migrations Workflow](examples/migrations-workflow/README.md) |
-| 4 | [Relationships](documentation/relationships/README.md) | Model one-to-one, one-to-many, many-to-one, many-to-many, and polymorphic relations. | [Relations](examples/relations/README.md) |
-| 5 | [Query Builder](documentation/query-builder/README.md) | Build filters, joins, aggregates, subqueries, and reusable Criteria. | [Advanced Querying](examples/advanced-querying/README.md) |
-| 6 | [Pagination and Filtering](documentation/pagination-filtering/README.md) | Use offset pagination, cursor pagination, ordering, and soft-delete filters. | [Pagination, Sorting, Soft Delete](examples/pagination-sorting-soft-delete/README.md) |
-| 7 | [Lifecycle Callbacks](documentation/lifecycle-callbacks/README.md) | Run entity hooks around persistence, updates, removal, and hydration. | [Lifecycle Callbacks](examples/lifecycle-callbacks/README.md) |
-| 8 | [Custom Types](documentation/custom-types/README.md) | Convert between PHP value objects/enums and database values. | [Custom Types](examples/custom-types/README.md) |
-| 9 | [Transactions and Locking](documentation/transactions-locking/README.md) | Use transactional writes, manual transaction control, and `SELECT ... FOR UPDATE`. | [Transactions and Locking](examples/transactions-locking/README.md) |
-| 10 | [Performance](documentation/performance/README.md) | Understand identity map behavior, result cache, second-level cache, query logging, partial hydration, and batch iteration. | [Advanced Querying](examples/advanced-querying/README.md) |
+| 1 | [Getting Started](documentation/getting-started/README.md) | Install Articulate, configure database access, and wire `Connection` plus `EntityManager`. | `app:catalog:crud` |
+| 2 | [Entity Mapping](documentation/entity-mapping/README.md) | Map PHP classes, properties, primary keys, standard/concurrent indexes, and same-table projections. | `app:catalog:crud`, `app:customers:cross-entity` |
+| 3 | [Migrations](documentation/migrations/README.md) | Generate and apply schema changes from entity metadata. | `articulate:init`, `articulate:migrate`, `articulate:diff` |
+| 4 | [Relationships](documentation/relationships/README.md) | Model one-to-one, one-to-many, many-to-one, many-to-many, and polymorphic relations. | `app:catalog:crud`, `app:orders:query`, `app:tagging:demo` |
+| 5 | [Query Builder](documentation/query-builder/README.md) | Build filters, joins, aggregates, subqueries, and reusable Criteria. | `app:catalog:query`, `app:orders:query`, `app:analytics:report` |
+| 6 | [Pagination and Filtering](documentation/pagination-filtering/README.md) | Use offset pagination, cursor pagination, ordering, and soft-delete filters. | `app:customers:browse`, `app:customers:soft-delete` |
+| 7 | [Lifecycle Callbacks](documentation/lifecycle-callbacks/README.md) | Run entity hooks around persistence, updates, removal, and hydration. | `app:customers:lifecycle` |
+| 8 | [Custom Types](documentation/custom-types/README.md) | Convert between PHP value objects/enums and database values. | `app:catalog:crud` |
+| 9 | [Transactions and Locking](documentation/transactions-locking/README.md) | Use transactional writes, manual transaction control, and `SELECT ... FOR UPDATE`. | `app:orders:place`, `app:orders:deadlock` |
+| 10 | [Performance](documentation/performance/README.md) | Understand identity map behavior, result cache, second-level cache, query logging, partial hydration, and batch iteration. | `app:analytics:report`, `app:analytics:batch`, `app:import:run` |
 
 ## Demo Feature Modules
 
@@ -39,7 +37,7 @@ The source code is organized by realistic e-commerce features. These modules are
 
 | Feature | Source | Commands | Demonstrates |
 |---------|--------|----------|--------------|
-| Catalog | [`src/Features/Catalog/`](src/Features/Catalog/README.md) | `app:catalog:crud`, `app:catalog:query` | Entity mapping, indexes, enum conversion, many-to-many products/categories, basic queries. |
+| Catalog | [`src/Features/Catalog/`](src/Features/Catalog/README.md) | `app:catalog:crud`, `app:catalog:query` | Entity mapping, standard/concurrent indexes, enum conversion, many-to-many products/categories, basic queries. |
 | Customer Accounts | [`src/Features/CustomerAccounts/`](src/Features/CustomerAccounts/README.md) | `app:customers:lifecycle`, `app:customers:browse`, `app:customers:soft-delete`, `app:customers:cross-entity` | Lifecycle callbacks, custom repositories, soft delete, cursor pagination, same-table projections, L2 sibling eviction. |
 | Orders | [`src/Features/Orders/`](src/Features/Orders/README.md) | `app:orders:place`, `app:orders:query`, `app:orders:deadlock` | Transactions, pessimistic locks, UUID IDs, order/item relations, complex query builder usage. |
 | Tagging | [`src/Features/Tagging/`](src/Features/Tagging/README.md) | `app:tagging:demo` | Polymorphic many-to-many tagging, morph aliases, pivot-table queries. |

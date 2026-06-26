@@ -2,7 +2,7 @@
 
 Build database queries with filters, joins, aggregates, subqueries, and reusable Criteria.
 
-**Runnable example:** [Advanced Querying](../../examples/advanced-querying/README.md)  
+**Runnable feature commands:** `app:catalog:query`, `app:orders:query`, `app:analytics:report`  
 **Related guide:** [Pagination and Filtering](../pagination-filtering/README.md)
 
 ## What This Covers

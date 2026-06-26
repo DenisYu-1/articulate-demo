@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/DenisYu-1/articulate.git",
-                "reference": "54c8a17fc20cefcc95eac9de950600577a43e3b8"
+                "reference": "c2cc93eff9b0effebbbf581b376166cd73e8ac8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/54c8a17fc20cefcc95eac9de950600577a43e3b8",
-                "reference": "54c8a17fc20cefcc95eac9de950600577a43e3b8",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/c2cc93eff9b0effebbbf581b376166cd73e8ac8c",
+                "reference": "c2cc93eff9b0effebbbf581b376166cd73e8ac8c",
                 "shasum": ""
             },
             "require": {
@@ -28,7 +28,7 @@
                 "symfony/uid": "^8.0"
             },
             "require-dev": {
-                "deptrac/deptrac": "^2.0",
+                "deptrac/deptrac": "^4.6",
                 "friendsofphp/php-cs-fixer": "^3.62",
                 "infection/infection": "dev-master",
                 "phpmd/phpmd": "^2.15",
@@ -67,7 +67,7 @@
                 "issues": "https://github.com/DenisYu-1/articulate/issues",
                 "source": "https://github.com/DenisYu-1/articulate/tree/improvements"
             },
-            "time": "2026-06-22T08:59:25+00:00"
+            "time": "2026-06-24T13:55:11+00:00"
         },
         {
             "name": "psr/cache",

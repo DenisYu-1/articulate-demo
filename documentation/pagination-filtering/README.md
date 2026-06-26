@@ -2,7 +2,7 @@
 
 Page through query results and apply global filters such as soft delete.
 
-**Runnable example:** [Pagination, Sorting, Soft Delete](../../examples/pagination-sorting-soft-delete/README.md)
+**Runnable feature commands:** `app:customers:browse`, `app:customers:soft-delete`
 
 ## What This Covers
 

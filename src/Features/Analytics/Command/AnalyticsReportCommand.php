@@ -138,6 +138,13 @@ final class AnalyticsReportCommand extends Command
             ->orderBy('id', 'ASC')
             ->getResult();
 
+        $orders = $this->entityManager
+            ->createQueryBuilder(OrderSnapshot::class)
+            ->whereIn('id', $orderIds)
+            ->orderBy('placed_at', 'ASC')
+            ->limit(3)
+            ->getResult();
+
         $items = $this->entityManager
             ->createQueryBuilder(OrderItemSnapshot::class)
             ->whereIn('order_id', $orderIds)
@@ -146,10 +153,12 @@ final class AnalyticsReportCommand extends Command
             ->getResult();
 
         $io->text(sprintf(
-            'Projection entities: %d ProductSnapshot row(s), %d OrderItemSnapshot sample row(s)',
+            'Projection entities: %d ProductSnapshot row(s), %d OrderSnapshot sample row(s), %d OrderItemSnapshot sample row(s)',
             count($products),
+            count($orders),
             count($items),
         ));
+        $io->text('Analytics columns: ' . $this->summarizeAnalyticsColumns($products, $orders, $items));
     }
 
     /**
@@ -295,6 +304,34 @@ final class AnalyticsReportCommand extends Command
     private function sumRevenue(array $rows): float
     {
         return array_sum(array_map(fn (array $row): float => (float) ($row['revenue'] ?? 0), $rows));
+    }
+
+    /**
+     * @param ProductSnapshot[] $products
+     * @param OrderSnapshot[] $orders
+     * @param OrderItemSnapshot[] $items
+     */
+    private function summarizeAnalyticsColumns(array $products, array $orders, array $items): string
+    {
+        $families = array_values(array_unique(array_filter(array_map(
+            fn (ProductSnapshot $product): ?string => $product->analyticsFamily,
+            $products,
+        ))));
+        $channels = array_values(array_unique(array_filter(array_map(
+            fn (OrderSnapshot $order): ?string => $order->analyticsChannel,
+            $orders,
+        ))));
+        $margin = array_sum(array_map(
+            fn (OrderItemSnapshot $item): float => (float) ($item->marginAmount ?? 0.0),
+            $items,
+        ));
+
+        return sprintf(
+            'families=%s; channels=%s; sample margin=%s',
+            implode('/', $families),
+            implode('/', $channels),
+            $this->money($margin),
+        );
     }
 
     private function money(float $value): string
