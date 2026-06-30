@@ -53,12 +53,12 @@ final class CatalogCrudCommand extends Command
         $this->entityManager->flush();
 
         $product = $this->findProductBySku($product->sku);
-        $this->attachCategory($product->id, $primaryCategory->id);
-        $this->attachCategory($product->id, $secondaryCategory->id);
+        $product->categories->add($primaryCategory);
+        $product->categories->add($secondaryCategory);
+        $this->entityManager->flush();
         $this->upsertStock($product->id, 25);
 
         $stock = $this->entityManager->find(InventorySlot::class, $product->id);
-        $categories = $this->loadCategoriesForProduct($product->id);
 
         $io->success(sprintf(
             'Created product #%d (%s), status=%s, stock=%d, categories=%d',
@@ -66,7 +66,7 @@ final class CatalogCrudCommand extends Command
             $product->sku,
             $product->statusEnum()->value,
             $stock instanceof InventorySlot ? $stock->stock : 0,
-            is_countable($categories) ? count($categories) : 0,
+            count($product->categories),
         ));
 
         $product->price = 1199.00;
@@ -155,41 +155,6 @@ final class CatalogCrudCommand extends Command
         }
 
         return $product;
-    }
-
-    private function attachCategory(int $productId, int $categoryId): void
-    {
-        $this->entityManager->getConnection()->executeQuery(
-            'INSERT INTO categories_products (products_id, categories_id) VALUES (?, ?)',
-            [$productId, $categoryId],
-        );
-    }
-
-    /**
-     * The current library release defines ManyToMany metadata, but its loader calls
-     * a missing ReflectionManyToMany method. Query the conventional pivot directly.
-     *
-     * @return Category[]
-     */
-    private function loadCategoriesForProduct(int $productId): array
-    {
-        $rows = $this->entityManager
-            ->createQueryBuilder()
-            ->select('categories_id')
-            ->from('categories_products')
-            ->where('products_id', $productId)
-            ->getResult();
-
-        $categoryIds = array_column($rows, 'categories_id');
-        if ($categoryIds === []) {
-            return [];
-        }
-
-        return $this->entityManager
-            ->createQueryBuilder(Category::class)
-            ->whereIn('id', $categoryIds)
-            ->orderBy('id', 'ASC')
-            ->getResult();
     }
 
     private function upsertStock(int $productId, int $stock): void

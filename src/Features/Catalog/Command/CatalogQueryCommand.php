@@ -66,8 +66,7 @@ final class CatalogQueryCommand extends Command
             $page,
         )));
 
-        $categories = $this->loadCategoriesForProduct($products[0]->id);
-        $io->success('Loaded many-to-many categories for first product: ' . (is_countable($categories) ? count($categories) : 0));
+        $io->success('Loaded many-to-many categories for first product: ' . count($products[0]->categories));
 
         return Command::SUCCESS;
     }
@@ -110,12 +109,15 @@ final class CatalogQueryCommand extends Command
         $this->entityManager->flush();
         $this->entityManager->clear();
 
+        $category = $this->findCategoryBySlug($category->slug);
+
         $products = [];
         foreach ($seed as [$sku]) {
             $product = $this->findProductBySku($sku);
-            $this->attachCategory($product->id, $category->id);
+            $product->categories->add($category);
             $products[] = $product;
         }
+        $this->entityManager->flush();
 
         return ['category' => $category, 'products' => $products];
     }
@@ -148,35 +150,4 @@ final class CatalogQueryCommand extends Command
         return $product;
     }
 
-    private function attachCategory(int $productId, int $categoryId): void
-    {
-        $this->entityManager->getConnection()->executeQuery(
-            'INSERT INTO categories_products (products_id, categories_id) VALUES (?, ?)',
-            [$productId, $categoryId],
-        );
-    }
-
-    /**
-     * @return Category[]
-     */
-    private function loadCategoriesForProduct(int $productId): array
-    {
-        $rows = $this->entityManager
-            ->createQueryBuilder()
-            ->select('categories_id')
-            ->from('categories_products')
-            ->where('products_id', $productId)
-            ->getResult();
-
-        $categoryIds = array_column($rows, 'categories_id');
-        if ($categoryIds === []) {
-            return [];
-        }
-
-        return $this->entityManager
-            ->createQueryBuilder(Category::class)
-            ->whereIn('id', $categoryIds)
-            ->orderBy('id', 'ASC')
-            ->getResult();
-    }
 }
