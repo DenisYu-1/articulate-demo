@@ -6,7 +6,7 @@ namespace App\Migrations;
 
 use Articulate\Modules\Migrations\Generator\BaseMigration;
 
-class Migration20260625000500Analytics extends BaseMigration
+class Migration20260703000500Analytics extends BaseMigration
 {
     protected function up(): void
     {

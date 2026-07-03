@@ -6,7 +6,7 @@ namespace App\Migrations;
 
 use Articulate\Modules\Migrations\Generator\BaseMigration;
 
-class Migration20260625000300Orders extends BaseMigration
+class Migration20260703000300Orders extends BaseMigration
 {
     protected function up(): void
     {

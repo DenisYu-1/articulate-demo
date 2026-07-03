@@ -6,7 +6,7 @@ namespace App\Migrations;
 
 use Articulate\Modules\Migrations\Generator\BaseMigration;
 
-class Migration20260625000100Catalog extends BaseMigration
+class Migration20260703000100Catalog extends BaseMigration
 {
     protected function isTransactional(): bool
     {

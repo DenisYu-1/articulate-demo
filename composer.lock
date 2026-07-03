@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/DenisYu-1/articulate.git",
-                "reference": "738097119c47e233718e07a9c80bd3d691891924"
+                "reference": "9339e35b44128aab2e65d04c4b6c181aade92bf4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/738097119c47e233718e07a9c80bd3d691891924",
-                "reference": "738097119c47e233718e07a9c80bd3d691891924",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/9339e35b44128aab2e65d04c4b6c181aade92bf4",
+                "reference": "9339e35b44128aab2e65d04c4b6c181aade92bf4",
                 "shasum": ""
             },
             "require": {
@@ -67,7 +67,7 @@
                 "issues": "https://github.com/DenisYu-1/articulate/issues",
                 "source": "https://github.com/DenisYu-1/articulate/tree/release-branch"
             },
-            "time": "2026-07-01T12:59:32+00:00"
+            "time": "2026-07-03T09:35:55+00:00"
         },
         {
             "name": "psr/cache",
