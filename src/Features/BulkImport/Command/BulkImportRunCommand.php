@@ -42,16 +42,21 @@ final class BulkImportRunCommand extends Command
         $io->section('Bulk import');
         $io->text(sprintf('Importing %d generated products per strategy; scoped batch size=%d.', $count, $batchSize));
 
-        $naiveCategory = $this->createCategory("Bulk Import Naive {$suffix}", "bulk-import-naive-{$suffix}");
-        $naive = $this->runNaiveImport($count, $naiveCategory, "IMP-NAIVE-{$suffix}");
+        $naiveCategory = $this->createCategory("Bulk Import Naive $suffix", "bulk-import-naive-$suffix");
+        $naive = $this->runNaiveImport($count, $naiveCategory, "IMP-NAIVE-$suffix");
         $this->entityManager->clear();
 
-        $scopedCategory = $this->createCategory("Bulk Import Scoped {$suffix}", "bulk-import-scoped-{$suffix}");
+        $scopedCategory = $this->createCategory("Bulk Import Scoped $suffix", "bulk-import-scoped-$suffix");
         $primaryUnitOfWork = $this->entityManager->getActiveUnitOfWork();
-        $scoped = $this->runScopedImport($count, $batchSize, $scopedCategory, "IMP-SCOPED-{$suffix}");
+        $scoped = $this->runScopedImportWithClear($count, $batchSize, $scopedCategory, "IMP-SCOPED-$suffix");
         $primaryStateAfterBatches = $primaryUnitOfWork->getEntityState($scopedCategory)->name;
 
         $failure = $this->demonstrateBatchFailure($suffix, $batchSize);
+        $this->entityManager->clear();
+
+        $scopedRecreatedCategory = $this->createCategory("Bulk Import Scoped Recreated $suffix", "bulk-import-scoped-remove-$suffix");
+        $scopedRecreated = $this->runScopedImportWithRecreation($count, $batchSize, $scopedRecreatedCategory, "IMP-SCOPED-RECREATED-$suffix");
+        $primaryStateAfterBatchesRecreated = $primaryUnitOfWork->getEntityState($scopedRecreatedCategory)->name;
         $this->entityManager->clear();
 
         $io->definitionList(
@@ -59,14 +64,30 @@ final class BulkImportRunCommand extends Command
             ['naive memory before' => $this->bytes($naive['before'])],
             ['naive memory before flush' => $this->bytes($naive['beforeFlush'])],
             ['naive memory after flush' => $this->bytes($naive['after'])],
-            ['naive growth curve' => $this->formatSamples($naive['samples'])],
+            ['naive retained growth' => $this->signedBytes($naive['after'] - $naive['before'])],
+            ['naive pending growth before flush' => $this->signedBytes($naive['beforeFlush'] - $naive['before'])],
+            ['naive per-sample memory delta' => $this->formatSampleDeltas($naive['samples'], $naive['before'])],
+            ['---' => '---'],
             ['scoped inserted rows' => (string) $scoped['inserted']],
             ['scoped batches' => (string) $scoped['batches']],
             ['scoped memory before' => $this->bytes($scoped['before'])],
             ['scoped memory after' => $this->bytes($scoped['after'])],
             ['scoped memory peak' => $this->bytes($scoped['peak'])],
-            ['scoped growth curve' => $this->formatSamples($scoped['samples'])],
-            ['primary category state after scoped batches' => $primaryStateAfterBatches],
+            ['scoped retained growth' => $this->signedBytes($scoped['after'] - $scoped['before'])],
+            ['scoped peak growth' => $this->signedBytes($scoped['peak'] - $scoped['before'])],
+            ['scoped per-batch memory delta' => $this->formatSampleDeltas($scoped['samples'], $scoped['before'])],
+            ['primary category state after scoped batches (expected: MANAGED)' => $primaryStateAfterBatches],
+            ['---' => '---'],
+            ['scoped (recreated) inserted rows' => (string) $scopedRecreated['inserted']],
+            ['scoped (recreated) batches' => (string) $scopedRecreated['batches']],
+            ['scoped (recreated) memory before' => $this->bytes($scopedRecreated['before'])],
+            ['scoped (recreated) memory after' => $this->bytes($scopedRecreated['after'])],
+            ['scoped (recreated) memory peak' => $this->bytes($scopedRecreated['peak'])],
+            ['scoped (recreated) retained growth' => $this->signedBytes($scopedRecreated['after'] - $scopedRecreated['before'])],
+            ['scoped (recreated) peak growth' => $this->signedBytes($scopedRecreated['peak'] - $scopedRecreated['before'])],
+            ['scoped (recreated) per-batch memory delta' => $this->formatSampleDeltas($scopedRecreated['samples'], $scopedRecreated['before'])],
+            ['primary category state after scoped (recreated) batches (expected: MANAGED)' => $primaryStateAfterBatchesRecreated],
+            ['---' => '---'],
             ['failure demo inserted rows' => (string) $failure['inserted']],
             ['failure demo skipped batch' => (string) $failure['failedBatch']],
             ['failure demo rollback check' => $failure['rollbackCheck']],
@@ -111,7 +132,55 @@ final class BulkImportRunCommand extends Command
     /**
      * @return array{inserted: int, batches: int, before: int, after: int, peak: int, samples: array<int, int>}
      */
-    private function runScopedImport(int $count, int $batchSize, ImportCategory $category, string $prefix): array
+    private function runScopedImportWithClear(int $count, int $batchSize, ImportCategory $category, string $prefix): array
+    {
+        $before = memory_get_usage();
+        $peak = $before;
+        $samples = [];
+        $batches = 0;
+        $imported = 0;
+
+        $batchUnitOfWork = $this->entityManager->createUnitOfWork();
+        while ($imported < $count) {
+            $currentBatchSize = min($batchSize, $count - $imported);
+
+            try {
+                $this->flushBatch(
+                    $batchUnitOfWork,
+                    $prefix,
+                    (int) $category->id,
+                    $imported + 1,
+                    $currentBatchSize,
+                );
+            } finally {
+                $batchUnitOfWork->clear();
+            }
+            gc_collect_cycles();
+
+            $imported += $currentBatchSize;
+            $batches++;
+            $currentMemory = memory_get_usage();
+            $peak = max($peak, $currentMemory);
+            $samples[$imported] = $currentMemory;
+        }
+
+        $after = memory_get_usage();
+        $peak = max($peak, $after);
+
+        return [
+            'inserted' => $this->countProductsByPrefix($prefix),
+            'batches' => $batches,
+            'before' => $before,
+            'after' => $after,
+            'peak' => $peak,
+            'samples' => $samples,
+        ];
+    }
+
+    /**
+     * @return array{inserted: int, batches: int, before: int, after: int, peak: int, samples: array<int, int>}
+     */
+    private function runScopedImportWithRecreation(int $count, int $batchSize, ImportCategory $category, string $prefix): array
     {
         $before = memory_get_usage();
         $peak = $before;
@@ -121,8 +190,8 @@ final class BulkImportRunCommand extends Command
 
         while ($imported < $count) {
             $currentBatchSize = min($batchSize, $count - $imported);
-            $batchUnitOfWork = $this->entityManager->createUnitOfWork();
 
+            $batchUnitOfWork = $this->entityManager->createUnitOfWork();
             try {
                 $this->flushBatch(
                     $batchUnitOfWork,
@@ -144,11 +213,14 @@ final class BulkImportRunCommand extends Command
             $samples[$imported] = $currentMemory;
         }
 
+        $after = memory_get_usage();
+        $peak = max($peak, $after);
+
         return [
             'inserted' => $this->countProductsByPrefix($prefix),
             'batches' => $batches,
             'before' => $before,
-            'after' => memory_get_usage(),
+            'after' => $after,
             'peak' => $peak,
             'samples' => $samples,
         ];
@@ -159,8 +231,8 @@ final class BulkImportRunCommand extends Command
      */
     private function demonstrateBatchFailure(string $suffix, int $requestedBatchSize): array
     {
-        $category = $this->createCategory("Bulk Import Failure {$suffix}", "bulk-import-failure-{$suffix}");
-        $prefix = "IMP-FAIL-{$suffix}";
+        $category = $this->createCategory("Bulk Import Failure $suffix", "bulk-import-failure-$suffix");
+        $prefix = "IMP-FAIL-$suffix";
         $batchSize = max(2, min($requestedBatchSize, 25));
         $failedBatch = 2;
         $resumedBatches = [];
@@ -274,13 +346,24 @@ final class BulkImportRunCommand extends Command
     /**
      * @param array<int, int> $samples
      */
-    private function formatSamples(array $samples): string
+    private function formatSampleDeltas(array $samples, int $baseline): string
     {
-        return implode(' | ', array_map(
-            fn (int $row, int $bytes): string => sprintf('%d=%s', $row, $this->bytes($bytes)),
-            array_keys($samples),
-            array_values($samples),
-        ));
+        $previous = $baseline;
+        $formatted = [];
+
+        foreach ($samples as $row => $bytes) {
+            $formatted[] = sprintf('%d=%s', $row, $this->signedBytes($bytes - $previous));
+            $previous = $bytes;
+        }
+
+        return implode(' | ', $formatted);
+    }
+
+    private function signedBytes(int $bytes): string
+    {
+        $sign = $bytes < 0 ? '-' : '+';
+
+        return $sign . $this->bytes(abs($bytes));
     }
 
     private function bytes(int $bytes): string
