@@ -30,11 +30,6 @@ final class AnalyticsBatchCommand extends Command
 
         $io->section('Analytics batch processing');
 
-        $chunkAvailable = method_exists($this->entityManager->createQueryBuilder(OrderSnapshot::class), 'chunk');
-        if (!$chunkAvailable) {
-            $io->warning('QueryBuilder::chunk() is not available in this installed library; using limit/offset fallback.');
-        }
-
         $bounded = $this->processSnapshots($orderIds, $chunkSize, clearEachBatch: true);
         $unbounded = $this->processSnapshots($orderIds, $chunkSize, clearEachBatch: false);
         $this->entityManager->clear();
@@ -67,22 +62,15 @@ final class AnalyticsBatchCommand extends Command
         $peak = $before;
         $rows = 0;
         $batches = 0;
-        $offset = 0;
 
-        while (true) {
-            $batch = $this->entityManager
-                ->createQueryBuilder(OrderSnapshot::class)
-                ->whereIn('id', $orderIds)
-                ->orderBy('placed_at', 'ASC')
-                ->orderBy('id', 'ASC')
-                ->limit($chunkSize)
-                ->offset($offset)
-                ->getResult();
+        $chunks = $this->entityManager
+            ->createQueryBuilder(OrderSnapshot::class)
+            ->whereIn('id', $orderIds)
+            ->orderBy('placed_at', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->chunk($chunkSize);
 
-            if ($batch === []) {
-                break;
-            }
-
+        foreach ($chunks as $batch) {
             $batches++;
             $rows += count($batch);
             $peak = max($peak, memory_get_usage());
@@ -90,8 +78,6 @@ final class AnalyticsBatchCommand extends Command
             if ($clearEachBatch) {
                 $this->entityManager->clear();
             }
-
-            $offset += $chunkSize;
         }
 
         $after = memory_get_usage();

@@ -30,9 +30,11 @@ $batch = $this->entityManager
     ->createQueryBuilder(OrderSnapshot::class)
     ->whereIn('id', $orderIds)
     ->orderBy('placed_at', 'ASC')
-    ->limit($chunkSize)
-    ->offset($offset)
-    ->getResult();
+    ->chunk($chunkSize);
+
+foreach ($batch as $rows) {
+    // Process one bounded result set.
+}
 ```
 
 ## Related Docs
@@ -43,6 +45,5 @@ $batch = $this->entityManager
 
 ## Known Caveats
 
-- `QueryBuilder::chunk()` is documented by the library but unavailable in the installed dependency, so `app:analytics:batch` uses a limit/offset fallback.
 - Scalar and partial hydration have current edge cases; see [Known Limitations](../../../documentation/known-limitations/README.md).
 - Command-level query logging currently uses an instrumented local connection because loggers are accepted at connection construction time.
