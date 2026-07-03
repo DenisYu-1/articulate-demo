@@ -8,6 +8,7 @@ use App\Features\Tagging\Entity\Tag;
 use App\Features\Tagging\Entity\TaggableCustomer;
 use App\Features\Tagging\Entity\TaggableOrder;
 use Articulate\Attributes\Relations\MorphTypeRegistry;
+use Articulate\Modules\EntityManager\Collection;
 use Articulate\Modules\EntityManager\EntityManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -62,12 +63,20 @@ final class TaggingDemoCommand extends Command
         $this->entityManager->persist($fallback);
         $this->entityManager->flush();
 
-        $this->attachTagTo($urgent->id, TaggableOrder::class, $orderId);
-        $this->attachTagTo($urgent->id, TaggableCustomer::class, $customer->id);
-        $this->attachTagTo($vip->id, TaggableCustomer::class, $customer->id);
-
         $taggedOrder = $this->entityManager->find(TaggableOrder::class, $orderId);
         $taggedCustomer = $this->entityManager->find(TaggableCustomer::class, $customer->id);
+        if (!$taggedOrder instanceof TaggableOrder || !$taggedCustomer instanceof TaggableCustomer) {
+            throw new \RuntimeException('Taggable projections were not found.');
+        }
+
+        if (!$taggedOrder->tags instanceof Collection || !$taggedCustomer->tags instanceof Collection) {
+            throw new \RuntimeException('MorphToMany relations were not hydrated as collections.');
+        }
+
+        $taggedOrder->tags->add($urgent);
+        $taggedCustomer->tags->add($urgent);
+        $taggedCustomer->tags->add($vip);
+        $this->entityManager->flush();
 
         $orderTags = $this->loadTagsFor(TaggableOrder::class, $orderId);
         $customerTags = $this->loadTagsFor(TaggableCustomer::class, (string) $customer->id);
@@ -122,16 +131,11 @@ final class TaggingDemoCommand extends Command
         return $tag;
     }
 
-    private function attachTagTo(int $tagId, string $entityClass, string|int $entityId): void
-    {
-        $this->insertTaggable($tagId, MorphTypeRegistry::getAlias($entityClass), (string) $entityId);
-    }
-
     private function insertTaggable(int $tagId, string $type, string $id): void
     {
         $this->entityManager->getConnection()->executeQuery(
-            'INSERT INTO taggables (id, tag_id, taggable_type, taggable_id) VALUES (?, ?, ?, ?)',
-            [random_int(1, 2147483647), $tagId, $type, $id],
+            'INSERT INTO taggables (tag_id, taggable_type, taggable_id) VALUES (?, ?, ?)',
+            [$tagId, $type, $id],
         );
     }
 

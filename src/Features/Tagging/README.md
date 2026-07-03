@@ -9,7 +9,7 @@ Tagging demonstrates polymorphic many-to-many metadata over customers and orders
 - `Tag` maps `tags` and declares inverse polymorphic collections for orders and customers.
 - `TaggableOrder` maps `orders` as a tagging projection.
 - `TaggableCustomer` maps `customers` as a tagging projection.
-- `taggables` is a pivot table with a required technical `id` plus `tag_id`, `taggable_type`, and `taggable_id`.
+- `taggables` is a pivot table with `tag_id`, `taggable_type`, and `taggable_id`.
 
 ## Commands
 
@@ -20,7 +20,7 @@ Tagging demonstrates polymorphic many-to-many metadata over customers and orders
 - `#[MorphToMany]` and `#[MorphedByMany]`.
 - `MorphTypeRegistry` aliases such as `order` and `customer`.
 - Same-table projection entities used only for a specific feature.
-- Pivot-table querying when direct relation loading is not available.
+- Pivot-table querying for inspecting the stored morph aliases.
 
 ```php
 #[Entity(tableName: 'tags')]
@@ -38,6 +38,6 @@ final class Tag
 
 ## Known Caveats
 
-- Current `loadRelation()` behavior returns `null` for these polymorphic relation objects, so the command keeps the attributes but queries the `taggables` pivot directly.
+- `loadRelation()` supports these polymorphic relation objects; the command also queries the `taggables` pivot directly to show the stored aliases.
 - `targetIdColumn: 'tag_id'` is explicit because the default would be `tags_id`.
 - `taggable_id` is stored as `VARCHAR(36)` so one column can hold integer customer ids and UUID order ids.
