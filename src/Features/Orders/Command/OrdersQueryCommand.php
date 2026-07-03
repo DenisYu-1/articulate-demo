@@ -146,17 +146,24 @@ final class OrdersQueryCommand extends Command
         $secondFixture = $this->createProductWithStock($suffix, 'ORDER-Q-B', 12, 49.50);
 
         $firstOrder = $this->createOrder($customer, 'open');
-        $firstOrderId = $this->scheduleOrderGraphWithUuid($firstOrder, [
+        $this->scheduleOrderGraph($firstOrder, [
             $this->createOrderItem($firstOrder, $firstFixture['product'], 2),
             $this->createOrderItem($firstOrder, $secondFixture['product'], 1),
         ]);
 
         $secondOrder = $this->createOrder($customer, 'shipped');
-        $secondOrderId = $this->scheduleOrderGraphWithUuid($secondOrder, [
+        $this->scheduleOrderGraph($secondOrder, [
             $this->createOrderItem($secondOrder, $secondFixture['product'], 4),
         ]);
 
         $this->entityManager->flush();
+
+        $firstOrderId = $firstOrder->id;
+        $secondOrderId = $secondOrder->id;
+        if ($firstOrderId === null || $secondOrderId === null) {
+            throw new \RuntimeException('Order ids were not assigned by flush().');
+        }
+
         $this->entityManager->clear();
 
         return ['customerId' => $customer->id, 'orderIds' => [$firstOrderId, $secondOrderId]];

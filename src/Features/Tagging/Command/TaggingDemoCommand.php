@@ -42,10 +42,16 @@ final class TaggingDemoCommand extends Command
         $fixture = $this->createProductWithStock($suffix, 'TAGGING', 6, 79.00);
 
         $order = $this->createOrder($customer);
-        $orderId = $this->scheduleOrderGraphWithUuid($order, [
+        $this->scheduleOrderGraph($order, [
             $this->createOrderItem($order, $fixture['product'], 1),
         ]);
         $this->entityManager->flush();
+
+        $orderId = $order->id;
+        if ($orderId === null) {
+            throw new \RuntimeException('Order id was not assigned by flush().');
+        }
+
         $this->entityManager->clear();
 
         $urgent = $this->createTag('Urgent', "urgent-{$suffix}");

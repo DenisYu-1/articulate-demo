@@ -48,5 +48,4 @@ class Customer
 ## Known Caveats
 
 - The soft-delete command uses a managed `deleted_at` update path because current soft-delete scheduling writes a `DateTimeImmutable` before the demo's string converter path runs.
-- Address relation loading is explicit because lazy relation proxies cannot be flushed safely in the installed dependency.
 - Snake_case fields keep explicit `#[Property(name: ...)]` mappings until hydrator fallback behavior is rechecked.

@@ -42,12 +42,17 @@ final class OrdersPlaceCommand extends Command
                 throw new \RuntimeException('Insufficient stock for order placement.');
             }
 
-            $orderId = $this->scheduleOrderGraphWithUuid($order, [$item]);
-            $io->text("UUID assigned before flush: {$orderId}");
-
+            $this->scheduleOrderGraph($order, [$item]);
             $stock->stock -= $item->quantity;
             $this->entityManager->persist($stock);
             $this->entityManager->flush();
+
+            $orderId = $order->id;
+            if ($orderId === null) {
+                throw new \RuntimeException('Order id was not assigned by flush().');
+            }
+
+            $io->text("Generated order id after flush: {$orderId}");
 
             return $orderId;
         });

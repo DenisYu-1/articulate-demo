@@ -45,6 +45,6 @@ final class Order
 
 ## Known Caveats
 
-- The command assigns the UUID before `flush()` as a demo workaround because current UUID generation happens during insert execution.
-- `where('shipped_at', null)` currently compiles to `= ?`; use `whereNull()` for working null checks.
+- Generated primary keys, including UUIDs, are assigned during `flush()` — `$entity->id` is available after the database insert.
+- `where('shipped_at', null)` compiles to `IS NULL` — `whereNull()` is equivalent and explicit.
 - The deadlock command demonstrates the lock-ordering risk without creating a real concurrent database deadlock.

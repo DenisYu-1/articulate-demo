@@ -11,7 +11,6 @@ use App\Features\Orders\Entity\Order;
 use App\Features\Orders\Entity\OrderItem;
 use Articulate\Connection;
 use Articulate\Modules\EntityManager\EntityManager;
-use Articulate\Modules\Generators\UuidGenerator;
 use Articulate\Modules\Repository\RepositoryFactory;
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -52,7 +51,7 @@ trait AnalyticsCommandSupport
         $this->entityManager->flush();
 
         $statuses = ['open', 'shipped', 'cancelled'];
-        $orderIds = [];
+        $orders = [];
         $firstItemId = null;
 
         for ($i = 0; $i < $orderCount; $i++) {
@@ -77,11 +76,18 @@ trait AnalyticsCommandSupport
             }
 
             $this->entityManager->persist($order);
-            $order->id ??= (new UuidGenerator())->generate(Order::class);
-            $orderIds[] = $order->id;
+            $orders[] = $order;
         }
 
         $this->entityManager->flush();
+
+        $orderIds = array_map(static function (Order $order): string {
+            if ($order->id === null) {
+                throw new \RuntimeException('Order id was not assigned by flush().');
+            }
+
+            return $order->id;
+        }, $orders);
 
         $this->populateAnalyticsColumns($orderIds, $products);
 

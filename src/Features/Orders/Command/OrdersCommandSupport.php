@@ -9,7 +9,6 @@ use App\Features\CustomerAccounts\Entity\Customer;
 use App\Features\Orders\Entity\Order;
 use App\Features\Orders\Entity\OrderItem;
 use App\Features\Orders\Entity\StockLock;
-use Articulate\Modules\Generators\UuidGenerator;
 
 trait OrdersCommandSupport
 {
@@ -83,17 +82,13 @@ trait OrdersCommandSupport
     /**
      * @param OrderItem[] $items
      */
-    private function scheduleOrderGraphWithUuid(Order $order, array $items): string
+    private function scheduleOrderGraph(Order $order, array $items): void
     {
         foreach ($items as $item) {
             $this->entityManager->persist($item);
         }
 
         $this->entityManager->persist($order);
-
-        $order->id ??= (new UuidGenerator())->generate(Order::class);
-
-        return $order->id;
     }
 
     private function lockStock(int $productId): StockLock
