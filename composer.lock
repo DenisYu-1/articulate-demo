@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "29f2ae618dfb0c464abb75e00ae4d5cb",
+    "content-hash": "9476565bff154d20668bb095cb48a028",
     "packages": [
         {
             "name": "denisyu-1/articulate",
-            "version": "dev-release-branch",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DenisYu-1/articulate.git",
-                "reference": "9339e35b44128aab2e65d04c4b6c181aade92bf4"
+                "reference": "22f473098ea58e5a98e60871761745181c42e5bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/9339e35b44128aab2e65d04c4b6c181aade92bf4",
-                "reference": "9339e35b44128aab2e65d04c4b6c181aade92bf4",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate/zipball/22f473098ea58e5a98e60871761745181c42e5bb",
+                "reference": "22f473098ea58e5a98e60871761745181c42e5bb",
                 "shasum": ""
             },
             "require": {
@@ -65,9 +65,60 @@
             ],
             "support": {
                 "issues": "https://github.com/DenisYu-1/articulate/issues",
-                "source": "https://github.com/DenisYu-1/articulate/tree/release-branch"
+                "source": "https://github.com/DenisYu-1/articulate/tree/v1.0.0"
             },
-            "time": "2026-07-03T09:35:55+00:00"
+            "time": "2026-07-05T12:49:44+00:00"
+        },
+        {
+            "name": "denisyu-1/articulate-symfony",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DenisYu-1/articulate-symfony.git",
+                "reference": "061bbc6f995e302bbcba7dc1baddb539cb8738aa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DenisYu-1/articulate-symfony/zipball/061bbc6f995e302bbcba7dc1baddb539cb8738aa",
+                "reference": "061bbc6f995e302bbcba7dc1baddb539cb8738aa",
+                "shasum": ""
+            },
+            "require": {
+                "denisyu-1/articulate": "^1.0.0",
+                "php": ">=8.4",
+                "psr/container": "^2.0",
+                "symfony/config": "^8.0",
+                "symfony/console": "^8.0",
+                "symfony/dependency-injection": "^8.0",
+                "symfony/http-kernel": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^13.0",
+                "symfony/cache": "^8.0",
+                "symfony/framework-bundle": "^8.0",
+                "symfony/yaml": "^8.0"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "symfony": {
+                    "allow-contrib": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Articulate\\Symfony\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "Symfony bundle integration for the Articulate context-bounded ORM",
+            "support": {
+                "issues": "https://github.com/DenisYu-1/articulate-symfony/issues",
+                "source": "https://github.com/DenisYu-1/articulate-symfony/tree/v1.0.0"
+            },
+            "time": "2026-07-05T16:21:41+00:00"
         },
         {
             "name": "psr/cache",
@@ -5332,9 +5383,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "denisyu-1/articulate": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

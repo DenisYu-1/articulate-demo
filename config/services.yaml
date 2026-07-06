@@ -3,11 +3,6 @@
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
-    articulate_entities_path: 'src'
-    articulate_migrations_path: '%env(resolve:ARTICULATE_MIGRATIONS_PATH)%'
-    articulate_migrations_namespace: 'App\Migrations'
-
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -25,61 +20,3 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
-    Articulate\Modules\Migrations\Generator\MigrationGenerator:
-        arguments:
-            $outputDirectory: '%articulate_migrations_path%'
-
-    Articulate\Commands\InitCommand:
-        tags: [ 'console.command' ]
-
-    Articulate\Commands\DiffCommand:
-        tags: [ 'console.command' ]
-        arguments:
-            $entitiesPath: '%articulate_entities_path%'
-            $migrationsPath: '%articulate_migrations_path%'
-            $migrationsNamespace: '%articulate_migrations_namespace%'
-
-    Articulate\Commands\MigrateCommand:
-        tags: [ 'console.command' ]
-        arguments:
-            $migrationsPath: '%articulate_migrations_path%'
-            $entitiesPath: '%articulate_entities_path%'
-
-    Articulate\Commands\ValidateCommand:
-        tags: [ 'console.command' ]
-        arguments:
-            $entitiesPath: '%articulate_entities_path%'
-
-    Articulate\Connection:
-        arguments:
-            $dsn: '%env(resolve:DATABASE_DSN)%'
-            $user: '%env(resolve:DATABASE_USER)%'
-            $password: '%env(resolve:DATABASE_PASSWORD)%'
-
-    Articulate\Modules\Repository\RepositoryFactory:
-        arguments:
-            $entityManager: '@Articulate\Modules\EntityManager\EntityManager'
-
-    Articulate\Modules\EntityManager\EntityManager:
-        arguments:
-            $connection: '@Articulate\Connection'
-        calls:
-            - setRepositoryFactory: ['@Articulate\Modules\Repository\RepositoryFactory']
-
-    Articulate\Modules\Database\SchemaComparator\DatabaseSchemaComparator:
-        arguments:
-            $databaseSchemaReader: '@Articulate\Modules\Database\SchemaReader\DatabaseSchemaReaderInterface'
-        
-    Articulate\Modules\Migrations\Generator\MigrationsCommandGenerator:
-
-    Articulate\Schema\SchemaNaming:
-
-    Articulate\Modules\Database\SchemaReader\MySqlSchemaReader:
-
-    Articulate\Modules\Database\SchemaReader\PostgresqlSchemaReader:
-
-    Articulate\Modules\Database\SchemaReader\DatabaseSchemaReaderInterface:
-        factory: [ 'Articulate\Modules\Database\SchemaReader\SchemaReaderFactory', 'create' ]
-        arguments:
-            $connection: '@Articulate\Connection'
