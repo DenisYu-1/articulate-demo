@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 docker-compose.override.yml
 /packages/articulate
 ###> symfony/framework-bundle ###
@@ -13,6 +14,7 @@ docker-compose.override.yml
 ###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache
+/.phpunit.cache/
 ###< phpunit/phpunit ###
 
 ts-authkey-test/state/

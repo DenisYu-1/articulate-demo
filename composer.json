@@ -1,5 +1,6 @@
 {
-    "name": "denis/articulate-demo",
+    "name": "denisyu-1/articulate-demo",
+    "description": "Runnable demo and documentation companion for the Articulate ORM",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -9,7 +10,8 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo": "*",
-        "denis/articulate": "dev-main",
+        "denisyu-1/articulate": "^1.0.0",
+        "denisyu-1/articulate-symfony": "^1.0.0",
         "symfony/console": "8.*",
         "symfony/dotenv": "8.*",
         "symfony/flex": "^2",
@@ -55,17 +57,11 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "docs:links": "php tools/check-markdown-links.php",
+        "test": "php vendor/bin/phpunit",
+        "test:coverage": "php vendor/bin/phpunit --configuration=phpunit.coverage.xml --dont-report-useless-tests"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/articulate",
-            "options": {
-                "symlink": false
-            }
-        }
-    ],
     "conflict": {
         "symfony/symfony": "*"
     },
@@ -76,6 +72,7 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.5"
+        "deptrac/deptrac": "^4.6",
+        "phpunit/phpunit": "^13.0"
     }
 }

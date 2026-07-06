@@ -1,0 +1,10 @@
+articulate:
+    connection:
+        dsn: '%env(resolve:DATABASE_DSN)%'
+        user: '%env(resolve:DATABASE_USER)%'
+        password: '%env(resolve:DATABASE_PASSWORD)%'
+
+    paths:
+        entities: '%kernel.project_dir%/src'
+        migrations: '%env(resolve:ARTICULATE_MIGRATIONS_PATH)%'
+        migrations_namespace: 'App\Migrations'

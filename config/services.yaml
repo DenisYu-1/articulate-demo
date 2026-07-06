@@ -3,11 +3,6 @@
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
-    articulate_entities_path: 'src/Entity'
-    articulate_migrations_path: 'migrations'
-    articulate_migrations_namespace: 'App\Migrations'
-
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -20,37 +15,8 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
+            - '../src/Features/*/Entity/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
-    Articulate\Commands\InitCommand:
-        tags: [ 'console.command' ]
-
-    Articulate\Commands\DiffCommand:
-        tags: [ 'console.command' ]
-        arguments:
-            $entitiesPath: '%articulate_entities_path%'
-            $migrationsPath: '%articulate_migrations_path%'
-            $migrationsNamespace: '%articulate_migrations_namespace%'
-
-    Articulate\Commands\MigrateCommand:
-        tags: [ 'console.command' ]
-        arguments:
-            $migrationsPath: '%articulate_migrations_path%'
-
-    Articulate\Connection:
-        arguments:
-            $dsn: '%env(resolve:DATABASE_DSN)%'
-            $user: '%env(resolve:DATABASE_USER)%'
-            $password: '%env(resolve:DATABASE_PASSWORD)%'
-
-    Articulate\Modules\DatabaseSchemaReader\DatabaseSchemaReader:
-
-    Articulate\Modules\DatabaseSchemaComparator\DatabaseSchemaComparator:
-        
-    Articulate\Modules\MigrationsGenerator\MigrationsCommandGenerator:
-
-    Articulate\Schema\SchemaNaming:

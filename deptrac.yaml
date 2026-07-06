@@ -1,0 +1,55 @@
+parameters:
+  paths:
+    - ./src/Features
+  exclude_files: []
+  layers:
+    - name: Analytics
+      collectors:
+        - type: directory
+          value: src/Features/Analytics
+
+    - name: BulkImport
+      collectors:
+        - type: directory
+          value: src/Features/BulkImport
+
+    - name: Catalog
+      collectors:
+        - type: directory
+          value: src/Features/Catalog
+
+    - name: CustomerAccounts
+      collectors:
+        - type: directory
+          value: src/Features/CustomerAccounts
+
+    - name: Orders
+      collectors:
+        - type: directory
+          value: src/Features/Orders
+
+    - name: Tagging
+      collectors:
+        - type: directory
+          value: src/Features/Tagging
+
+  ruleset:
+    Analytics:
+      - Catalog
+      - CustomerAccounts
+      - Orders
+
+    BulkImport: ~
+
+    Catalog: ~
+
+    CustomerAccounts: ~
+
+    Orders:
+      - Catalog
+      - CustomerAccounts
+
+    Tagging:
+      - Catalog
+      - CustomerAccounts
+      - Orders

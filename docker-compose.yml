@@ -46,14 +46,14 @@ services:
       - mysql
 
   mysql:
-    image: mysql
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: ${DATABASE_USER}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "3307:3306"
+      - "33307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -74,4 +74,3 @@ volumes:
 
 networks:
   default:
-
