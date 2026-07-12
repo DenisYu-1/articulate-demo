@@ -73,6 +73,12 @@ class FeatureCommandsTest extends TestCase
         $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
     }
 
+    public function testCustomersOneUpdateCommandRunsSuccessfully(): void
+    {
+        [$exitCode, $content] = $this->runCommand('app:customers:one-update');
+        $this->assertSame(0, $exitCode, $content ?: 'Command produced no output');
+    }
+
     public function testOrdersPlaceCommandRunsSuccessfully(): void
     {
         [$exitCode, $content] = $this->runCommand('app:orders:place');

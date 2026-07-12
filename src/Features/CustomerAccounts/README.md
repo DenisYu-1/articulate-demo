@@ -17,6 +17,7 @@ Customer Accounts models registration, profile browsing, lifecycle callbacks, so
 - `app:customers:browse` uses `CustomerRepository`, offset pagination, cursor pagination, and explicit address loading.
 - `app:customers:soft-delete` shows global soft-delete filtering, `withoutFilter('soft_delete')`, and reactivation.
 - `app:customers:cross-entity` demonstrates identity-map and second-level-cache behavior when multiple classes map the same row.
+- `app:customers:one-update` demonstrates two same-row projection writes merging into one SQL `UPDATE`, and `ThrowOnUpdateConflictStrategy` rejecting conflicting sibling writes.
 
 ## Articulate Concepts Demonstrated
 
