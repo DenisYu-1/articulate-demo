@@ -3,6 +3,7 @@
 namespace App\Features\CustomerAccounts\Command;
 
 use App\Features\Analytics\Diagnostics\CountingQueryLogger;
+use App\Features\CustomerAccounts\Entity\Address;
 use App\Features\CustomerAccounts\Entity\Customer;
 use App\Features\CustomerAccounts\Entity\CustomerSummary;
 use Articulate\Connection;
@@ -64,6 +65,7 @@ final class CustomersCrossEntityCommand extends Command
 
         $this->demonstrateMergedUpdate($io, $customerId);
         $this->demonstrateSecondLevelCacheSiblingEviction($io, $suffix);
+        $this->demonstrateStaleRelationReference($io, $suffix);
 
         $summaryRepository = $this->entityManager->getRepository(CustomerSummary::class);
         $io->text('Entity without repositoryClass uses: ' . basename(str_replace('\\', '/', $summaryRepository::class)));
@@ -150,6 +152,59 @@ final class CustomersCrossEntityCommand extends Command
             ['reader Customer after writer flush' => $readerCustomerAfter instanceof Customer ? $readerCustomerAfter->name : 'missing'],
             ['reader CustomerSummary after writer flush' => $readerSummaryAfter instanceof CustomerSummary ? $readerSummaryAfter->name : 'missing'],
             ['reader reload queries after writer flush' => "{$afterUpdateQueries} query(s)"],
+        );
+    }
+
+    private function demonstrateStaleRelationReference(SymfonyStyle $io, string $suffix): void
+    {
+        $io->section('Stale relation reference');
+
+        $customer = $this->createCustomerWithAddress(
+            'Stale Relation Customer',
+            "stale-relation-$suffix@example.test",
+            "Stale Relation $suffix",
+        );
+        $customerId = $customer->id;
+        $this->entityManager->clear();
+
+        $loadedCustomer = $this->entityManager->find(Customer::class, $customerId);
+        if (!$loadedCustomer instanceof Customer) {
+            throw new \RuntimeException('Cannot demonstrate stale relation reference.');
+        }
+
+        $loadedAddress = $this->entityManager->loadRelation($loadedCustomer, 'address');
+        if (!$loadedAddress instanceof Address) {
+            throw new \RuntimeException('Customer address relation was not loaded.');
+        }
+
+        $addressId = $loadedAddress->id;
+        $this->entityManager->getConnection()->executeQuery(
+            'UPDATE customer_addresses SET city = ? WHERE id = ?',
+            ['London', $addressId],
+        );
+
+        $freshAddress = $this->entityManager->find(Address::class, $addressId);
+        if (!$freshAddress instanceof Address) {
+            throw new \RuntimeException('Updated address was not reloaded.');
+        }
+
+        $qbAddress = $this->entityManager
+            ->createQueryBuilder(Address::class)
+            ->where('id', $addressId)
+            ->getSingleResult();
+
+        if (!$qbAddress instanceof Address) {
+            throw new \RuntimeException('Address queryBuilder reload failed.');
+        }
+
+        $io->definitionList(
+            ['old value' => 'Berlin'],
+            ['new value' => 'London'],
+            ['fresh Address city after refetch' => $freshAddress->city],
+            ['queryBuilder Address city after refetch' => $qbAddress->city],
+            ['customer->address city after refetch' => $loadedCustomer->address?->city ?? 'missing'],
+            ['same in-memory instance retrieved from find: (expected: yes)' => $loadedAddress === $freshAddress ? 'yes' : 'no'],
+            ['queryBuilder is fresh (expected: no)' => $qbAddress->city !== $loadedAddress->city ? 'yes' : 'no'],
         );
     }
 
