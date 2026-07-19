@@ -15,5 +15,7 @@ framework:
         #app: cache.adapter.apcu
 
         # Namespaced pools use the above "app" backend by default
-        #pools:
+        pools:
+          articulate.metadata_cache:
+            adapter: cache.adapter.filesystem
             #my.dedicated.cache: null

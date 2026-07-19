@@ -5,6 +5,15 @@ articulate:
         password: '%env(resolve:DATABASE_PASSWORD)%'
 
     paths:
-        entities: '%kernel.project_dir%/src'
+        entities: [
+          '%kernel.project_dir%/src/Features/Analytics',
+          '%kernel.project_dir%/src/Features/BulkImport',
+          '%kernel.project_dir%/src/Features/Catalog',
+          '%kernel.project_dir%/src/Features/CustomerAccounts',
+          '%kernel.project_dir%/src/Features/Orders',
+          '%kernel.project_dir%/src/Features/Tagging',
+        ]
         migrations: '%env(resolve:ARTICULATE_MIGRATIONS_PATH)%'
         migrations_namespace: 'App\Migrations'
+    cache:
+      metadata: 'articulate.metadata_cache'

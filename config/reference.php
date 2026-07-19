@@ -127,7 +127,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  * }
  * @psalm-type ServicesConfig = array{
  *     _defaults?: DefaultsType,
- *     _instanceof?: InstanceofType,
+ *     _instanceof?: array<class-string, InstanceofType>,
  *     ...<string, DefinitionType|AliasType|PrototypeType|StackType|ArgumentsType|null>
  * }
  * @psalm-type ExtensionType = array<string, mixed>
@@ -709,7 +709,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         persistent?: bool|Param, // Default: false
  *     },
  *     paths?: array{
- *         entities?: scalar|Param|null, // Default: "%kernel.project_dir%/src/Entity"
+ *         entities?: string|list<scalar|Param|null>,
  *         migrations?: scalar|Param|null, // Default: "%kernel.project_dir%/migrations/Articulate"
  *         migrations_namespace?: scalar|Param|null, // Default: "App\\Migrations\\Articulate"
  *     },
@@ -717,6 +717,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         result?: scalar|Param|null, // Default: null
  *         statement?: scalar|Param|null, // Default: null
  *         second_level?: scalar|Param|null, // Default: null
+ *         metadata?: scalar|Param|null, // Default: null
  *         second_level_ttl?: int|Param, // Default: 3600
  *     },
  *     logging?: array{
