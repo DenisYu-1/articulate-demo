@@ -67,8 +67,6 @@ final class CustomersOneUpdateCommand extends Command
         $managedSummary->email = "one-update-final-{$suffix}@example.test";
 
         $observedLogger->reset();
-        $observedEm->persist($managedCustomer);
-        $observedEm->persist($managedSummary);
         $observedEm->flush();
 
         $customerUpdates = array_values(array_filter(

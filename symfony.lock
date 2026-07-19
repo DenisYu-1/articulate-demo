@@ -1,6 +1,6 @@
 {
     "denisyu-1/articulate-symfony": {
-        "version": "v1.0.0"
+        "version": "dev-metadata-cache"
     },
     "deptrac/deptrac": {
         "version": "4.6.1"
